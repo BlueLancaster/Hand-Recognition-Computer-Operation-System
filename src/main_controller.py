@@ -13,13 +13,14 @@ class MainController(QtWidgets.QMainWindow):
         self.ui.setupUi(self)  # 將ui和QtWidgets初始化
         self.animation1 = None
         self.animation2 = None
+
         self.ui.side_menu.enterEvent = self.side_menu_animation  # 當滑鼠進入觸發
         self.ui.side_menu.leaveEvent = self.side_menu_animation  # 當滑鼠離開觸發
         # 按鍵綁定切換頁面
         self.ui.home_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(0))
         self.ui.profile_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(1))
         self.ui.gesture_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(2))
-        self.ui.mouse_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(3))
+        self.ui.setting_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(3))
 
     def side_menu_animation(self, event):
         # 目錄開關動畫

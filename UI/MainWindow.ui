@@ -150,7 +150,7 @@
              <string notr="true">border:none</string>
             </property>
             <property name="text">
-             <string notr="true">Menu</string>
+             <string>Menu</string>
             </property>
             <property name="icon">
              <iconset resource="res.qrc">
@@ -294,7 +294,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QToolButton" name="mouse_btn">
+           <widget class="QToolButton" name="setting_btn">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -318,11 +318,11 @@
              <string notr="true">border:none</string>
             </property>
             <property name="text">
-             <string>Mouse</string>
+             <string>Settings</string>
             </property>
             <property name="icon">
              <iconset resource="res.qrc">
-              <normaloff>:/icons/icons/mouse.png</normaloff>:/icons/icons/mouse.png</iconset>
+              <normaloff>:/icons/icons/setting.png</normaloff>:/icons/icons/setting.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -380,7 +380,7 @@
           </sizepolicy>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="home_page">
           <layout class="QVBoxLayout" name="verticalLayout_18">
@@ -1601,7 +1601,7 @@
            </item>
           </layout>
          </widget>
-         <widget class="QWidget" name="mouse_page">
+         <widget class="QWidget" name="setting_page">
           <layout class="QVBoxLayout" name="verticalLayout">
            <property name="spacing">
             <number>0</number>
@@ -1619,7 +1619,7 @@
             <number>0</number>
            </property>
            <item>
-            <widget class="QFrame" name="pic_area">
+            <widget class="QFrame" name="top_area">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                <horstretch>0</horstretch>
@@ -1634,43 +1634,251 @@
              </property>
              <layout class="QHBoxLayout" name="horizontalLayout_2">
               <item>
-               <widget class="QLabel" name="pic">
-                <property name="maximumSize">
-                 <size>
-                  <width>600</width>
-                  <height>400</height>
-                 </size>
+               <widget class="QFrame" name="video_area">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                  <horstretch>3</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
                 </property>
-                <property name="text">
-                 <string/>
+                <property name="frameShape">
+                 <enum>QFrame::StyledPanel</enum>
                 </property>
-                <property name="pixmap">
-                 <pixmap resource="res.qrc">:/pic/pic/mouse.png</pixmap>
+                <property name="frameShadow">
+                 <enum>QFrame::Raised</enum>
                 </property>
-                <property name="scaledContents">
-                 <bool>true</bool>
+                <layout class="QHBoxLayout" name="horizontalLayout_5">
+                 <item>
+                  <widget class="QGraphicsView" name="video_graphicsView">
+                   <property name="minimumSize">
+                    <size>
+                     <width>480</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>480</width>
+                     <height>360</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="model_arg_area">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                  <horstretch>1</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
                 </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                <property name="font">
+                 <font>
+                  <family>Adobe 黑体 Std R</family>
+                  <pointsize>14</pointsize>
+                 </font>
                 </property>
+                <property name="title">
+                 <string>模型係數</string>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_2">
+                 <item>
+                  <widget class="QGroupBox" name="groupBox_6">
+                   <property name="font">
+                    <font>
+                     <pointsize>7</pointsize>
+                    </font>
+                   </property>
+                   <property name="title">
+                    <string/>
+                   </property>
+                   <layout class="QFormLayout" name="formLayout_4">
+                    <property name="horizontalSpacing">
+                     <number>0</number>
+                    </property>
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="model_complex_label">
+                      <property name="font">
+                       <font>
+                        <family>Adobe 黑体 Std R</family>
+                        <pointsize>14</pointsize>
+                       </font>
+                      </property>
+                      <property name="text">
+                       <string>快速模型</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="0">
+                     <widget class="QCheckBox" name="model_complex_checkBox">
+                      <property name="font">
+                       <font>
+                        <family>Adobe 黑体 Std R</family>
+                        <pointsize>12</pointsize>
+                       </font>
+                      </property>
+                      <property name="text">
+                       <string>狀態:關</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="2" column="0">
+                     <widget class="QLabel" name="model_complex_caption">
+                      <property name="font">
+                       <font>
+                        <pointsize>9</pointsize>
+                       </font>
+                      </property>
+                      <property name="text">
+                       <string>開會讓模型便準確
+但會導致延遲</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QGroupBox" name="groupBox_7">
+                   <property name="title">
+                    <string/>
+                   </property>
+                   <layout class="QFormLayout" name="formLayout_9">
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="detection_label">
+                      <property name="font">
+                       <font>
+                        <family>Adobe 黑体 Std R</family>
+                        <pointsize>14</pointsize>
+                       </font>
+                      </property>
+                      <property name="text">
+                       <string>偵測係數</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="0">
+                     <widget class="QDoubleSpinBox" name="detection_spinBox">
+                      <property name="font">
+                       <font>
+                        <family>Adobe 黑体 Std R</family>
+                        <pointsize>9</pointsize>
+                       </font>
+                      </property>
+                      <property name="decimals">
+                       <number>1</number>
+                      </property>
+                      <property name="maximum">
+                       <double>1.000000000000000</double>
+                      </property>
+                      <property name="singleStep">
+                       <double>0.100000000000000</double>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="2" column="0">
+                     <widget class="QLabel" name="detection_caption">
+                      <property name="font">
+                       <font>
+                        <pointsize>9</pointsize>
+                       </font>
+                      </property>
+                      <property name="text">
+                       <string>降低可以讓手更容易被偵測
+但會降低準度</string>
+                      </property>
+                      <property name="scaledContents">
+                       <bool>false</bool>
+                      </property>
+                      <property name="wordWrap">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QGroupBox" name="groupBox_8">
+                   <property name="title">
+                    <string/>
+                   </property>
+                   <layout class="QFormLayout" name="formLayout_10">
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="tracking_label">
+                      <property name="font">
+                       <font>
+                        <family>Adobe 黑体 Std R</family>
+                        <pointsize>14</pointsize>
+                       </font>
+                      </property>
+                      <property name="text">
+                       <string>追蹤系數</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="0">
+                     <widget class="QDoubleSpinBox" name="tracking_spinBox">
+                      <property name="font">
+                       <font>
+                        <family>Adobe 黑体 Std R</family>
+                        <pointsize>9</pointsize>
+                       </font>
+                      </property>
+                      <property name="decimals">
+                       <number>1</number>
+                      </property>
+                      <property name="maximum">
+                       <double>1.000000000000000</double>
+                      </property>
+                      <property name="singleStep">
+                       <double>0.100000000000000</double>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="2" column="0">
+                     <widget class="QLabel" name="tracking_caption">
+                      <property name="font">
+                       <font>
+                        <pointsize>9</pointsize>
+                       </font>
+                      </property>
+                      <property name="text">
+                       <string>增加可以讓手的追蹤效果更好
+但會增加延遲</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                </layout>
                </widget>
               </item>
              </layout>
             </widget>
            </item>
            <item>
-            <widget class="QFrame" name="arg_area">
+            <widget class="QGroupBox" name="filter_arg_area">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                <horstretch>0</horstretch>
                <verstretch>1</verstretch>
               </sizepolicy>
              </property>
-             <property name="frameShape">
-              <enum>QFrame::StyledPanel</enum>
+             <property name="font">
+              <font>
+               <family>Adobe 黑体 Std R</family>
+               <pointsize>14</pointsize>
+               <weight>50</weight>
+               <bold>false</bold>
+              </font>
              </property>
-             <property name="frameShadow">
-              <enum>QFrame::Raised</enum>
+             <property name="title">
+              <string>濾波器係數</string>
              </property>
              <layout class="QHBoxLayout" name="horizontalLayout_3">
               <item>
@@ -1786,7 +1994,7 @@
                     </font>
                    </property>
                    <property name="text">
-                    <string>降低此係數，降低抖動，但會導致延遲</string>
+                    <string>降低可以降低抖動，但會導致延遲</string>
                    </property>
                   </widget>
                  </item>
@@ -1846,7 +2054,7 @@
                     </font>
                    </property>
                    <property name="text">
-                    <string> 增加此參數，可以降低延遲，但會贈加抖動</string>
+                    <string> 增加可以降低延遲，但會贈加抖動</string>
                    </property>
                   </widget>
                  </item>
@@ -1869,6 +2077,7 @@
   </widget>
  </widget>
  <resources>
+  <include location="res.qrc"/>
   <include location="res.qrc"/>
  </resources>
  <connections/>

@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/setting.png</file>
     <file>icons/check.png</file>
     <file>icons/computer-mouse.png</file>
     <file>icons/copy.png</file>
