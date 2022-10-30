@@ -1,0 +1,21 @@
+<RCC>
+  <qresource prefix="icons">
+    <file>icons/check.png</file>
+    <file>icons/computer-mouse.png</file>
+    <file>icons/copy.png</file>
+    <file>icons/default.png</file>
+    <file>icons/home.png</file>
+    <file>icons/left.png</file>
+    <file>icons/menu.png</file>
+    <file>icons/minus.png</file>
+    <file>icons/mouse.png</file>
+    <file>icons/play.png</file>
+    <file>icons/plus.png</file>
+    <file>icons/stop-sign.png</file>
+    <file>icons/user.png</file>
+    <file>icons/zoom-in.png</file>
+  </qresource>
+  <qresource prefix="pic">
+    <file>pic/mouse.png</file>
+  </qresource>
+</RCC>
