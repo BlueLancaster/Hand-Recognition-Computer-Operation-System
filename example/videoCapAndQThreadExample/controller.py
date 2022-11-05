@@ -15,18 +15,19 @@ from video_test import Ui_VideoWindow
 
 
 class UiThread(QThread):
-    trigger = pyqtSignal(str)
+    trigger1 = pyqtSignal(str)
+    trigger2 = pyqtSignal(str)
 
     def __init__(self):
         # 初始化函数
         super(UiThread, self).__init__()
-        print("mouse")
 
     def run(self):
         for i in range(20):
             # 通过自定义信号把待显示的字符串传递给槽函数
             sleep(0.1)
-            self.trigger.emit(str(i))
+            self.trigger1.emit(str(i))
+            self.trigger2.emit(str(i))
 
 
 class VideoThread(QThread):
@@ -67,7 +68,8 @@ class MainWindowController(QtWidgets.QMainWindow):
         self.ui.pushButton.clicked.connect(self.buttonClicked)
         self.ui.pushButton_2.clicked.connect(self.buttonClicked)
         self.ui_thread = UiThread()
-        self.ui_thread.trigger.connect(self.display)
+        self.ui_thread.trigger1.connect(self.display)
+        self.ui_thread.trigger2.connect(self.display)
 
     def setup_control(self):
         self.ui.textEdit.setText('Happy World!')
@@ -97,6 +99,7 @@ class VideoWindowController(QtWidgets.QMainWindow):
         self.ui.openCamButton.clicked.connect(self.openCam)
 
     def openCam(self):
+        print(self.video_thread.started)
         self.video_thread.start()
 
     def display(self, frame):

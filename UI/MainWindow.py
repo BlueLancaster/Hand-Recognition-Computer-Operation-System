@@ -456,6 +456,10 @@ class Ui_MainWindow(object):
         self.verticalLayout_9.setSpacing(0)
         self.verticalLayout_9.setObjectName("verticalLayout_9")
         self.profile_list = QtWidgets.QListWidget(self.profile_list_area)
+        font = QtGui.QFont()
+        font.setFamily("Adobe 黑体 Std R")
+        font.setPointSize(12)
+        self.profile_list.setFont(font)
         self.profile_list.setObjectName("profile_list")
         self.verticalLayout_9.addWidget(self.profile_list)
         self.verticalLayout_8.addWidget(self.profile_list_area)
@@ -539,6 +543,7 @@ class Ui_MainWindow(object):
         self.profile_name.setSizePolicy(sizePolicy)
         self.profile_name.setMaximumSize(QtCore.QSize(16777215, 30))
         font = QtGui.QFont()
+        font.setFamily("Adobe 黑体 Std R")
         font.setPointSize(12)
         self.profile_name.setFont(font)
         self.profile_name.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
@@ -1008,7 +1013,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
-        self.stackedWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):

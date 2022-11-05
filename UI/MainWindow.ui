@@ -380,7 +380,7 @@
           </sizepolicy>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="home_page">
           <layout class="QVBoxLayout" name="verticalLayout_18">
@@ -966,7 +966,14 @@
                   <number>15</number>
                  </property>
                  <item>
-                  <widget class="QListWidget" name="profile_list"/>
+                  <widget class="QListWidget" name="profile_list">
+                   <property name="font">
+                    <font>
+                     <family>Adobe 黑体 Std R</family>
+                     <pointsize>12</pointsize>
+                    </font>
+                   </property>
+                  </widget>
                  </item>
                 </layout>
                </widget>
@@ -1159,6 +1166,7 @@
                    </property>
                    <property name="font">
                     <font>
+                     <family>Adobe 黑体 Std R</family>
                      <pointsize>12</pointsize>
                     </font>
                    </property>
