@@ -380,7 +380,7 @@
           </sizepolicy>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>2</number>
          </property>
          <widget class="QWidget" name="home_page">
           <layout class="QVBoxLayout" name="verticalLayout_18">
@@ -1272,7 +1272,7 @@
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_19">
               <item>
-               <widget class="QGroupBox" name="profile_list_box">
+               <widget class="QGroupBox" name="selected_profile_area">
                 <property name="minimumSize">
                  <size>
                   <width>320</width>
@@ -1281,7 +1281,7 @@
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>320</width>
+                  <width>16777215</width>
                   <height>16777215</height>
                  </size>
                 </property>
@@ -1310,7 +1310,7 @@
                   <number>0</number>
                  </property>
                  <item>
-                  <widget class="QLabel" name="profile_combo_box_label">
+                  <widget class="QLabel" name="selected_profile_label">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                      <horstretch>0</horstretch>
@@ -1334,39 +1334,16 @@
                    </property>
                   </widget>
                  </item>
-                 <item alignment="Qt::AlignLeft">
-                  <widget class="QComboBox" name="profile_combo_box">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>150</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>200</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
+                 <item>
+                  <widget class="QLabel" name="selected_profile">
                    <property name="font">
                     <font>
-                     <pointsize>12</pointsize>
+                     <family>Adobe 黑体 Std R</family>
                     </font>
                    </property>
-                   <property name="maxVisibleItems">
-                    <number>50</number>
+                   <property name="text">
+                    <string/>
                    </property>
-                   <item>
-                    <property name="text">
-                     <string>default</string>
-                    </property>
-                   </item>
                   </widget>
                  </item>
                 </layout>
@@ -1500,7 +1477,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QTableWidget" name="tableWidget">
+               <widget class="QTableWidget" name="key_binding_table">
                 <property name="font">
                  <font>
                   <family>Adobe 黑体 Std R</family>
@@ -1513,11 +1490,14 @@
                 <property name="sizeAdjustPolicy">
                  <enum>QAbstractScrollArea::AdjustIgnored</enum>
                 </property>
+                <property name="showGrid">
+                 <bool>true</bool>
+                </property>
                 <property name="gridStyle">
                  <enum>Qt::SolidLine</enum>
                 </property>
                 <attribute name="horizontalHeaderVisible">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </attribute>
                 <attribute name="horizontalHeaderCascadingSectionResizes">
                  <bool>false</bool>
@@ -1526,7 +1506,7 @@
                  <number>241</number>
                 </attribute>
                 <attribute name="horizontalHeaderMinimumSectionSize">
-                 <number>241</number>
+                 <number>275</number>
                 </attribute>
                 <attribute name="horizontalHeaderStretchLastSection">
                  <bool>false</bool>
@@ -1549,11 +1529,6 @@
                 <attribute name="verticalHeaderStretchLastSection">
                  <bool>false</bool>
                 </attribute>
-                <row>
-                 <property name="text">
-                  <string>New Row</string>
-                 </property>
-                </row>
                 <column>
                  <property name="text">
                   <string>功能</string>
@@ -1587,21 +1562,6 @@
                   </font>
                  </property>
                 </column>
-                <item row="0" column="0">
-                 <property name="text">
-                  <string>0</string>
-                 </property>
-                </item>
-                <item row="0" column="1">
-                 <property name="text">
-                  <string>0</string>
-                 </property>
-                </item>
-                <item row="0" column="2">
-                 <property name="text">
-                  <string>1</string>
-                 </property>
-                </item>
                </widget>
               </item>
              </layout>

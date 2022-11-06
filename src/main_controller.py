@@ -2,6 +2,7 @@ import time
 
 import PyQt5
 from PyQt5 import QtWidgets, QtCore
+from PyQt5.QtWidgets import QTableWidgetItem
 
 from UI.MainWindow import Ui_MainWindow
 from utils.settings_provider import SettingsProvider
@@ -19,9 +20,11 @@ class MainController(QtWidgets.QMainWindow):
         self.setting_provider.trigger_selected.connect(self.set_profile_list_selected_item)
         self.setting_provider.trigger_info.connect(self.set_profile_list_set_description)
         self.setting_provider.trigger_update_profile_list.connect(lambda num: self.ui.profile_list.clear())
+        self.setting_provider.trigger_update_key_binding.connect(self.set_key_binding_table_row)
         self.setting_provider.start()
 
-        self.ui.profile_list.clicked.connect(lambda: self.setting_provider.change_current_settings_file(self.ui.profile_list.currentRow()))
+        self.ui.profile_list.clicked.connect(
+            lambda: self.setting_provider.change_current_settings_file(self.ui.profile_list.currentRow()))
         self.ui.side_menu.enterEvent = self.side_menu_animation  # when mouse enters,animation takes place
         self.ui.side_menu.leaveEvent = self.side_menu_animation  # when mouse leaves,animation takes place
         # when button clicked, changing the page the stackedWidget displays
@@ -29,13 +32,24 @@ class MainController(QtWidgets.QMainWindow):
         self.ui.profile_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(1))
         self.ui.gesture_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(2))
         self.ui.setting_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(3))
-        self.ui.apply_btn.clicked.connect(lambda: self.setting_provider.save_json(self.ui.profile_name.toPlainText(), self.ui.profile_description_context.toPlainText()))
+        self.ui.apply_btn.clicked.connect(lambda: self.setting_provider.save_json(self.ui.profile_name.toPlainText(),
+                                                                                  self.ui.profile_description_context.toPlainText()))
+        self.ui.add_btn.clicked.connect(self.setting_provider.create_json)
+        self.ui.del_btn.clicked.connect(self.setting_provider.del_json)
+        self.ui.copy_btn.clicked.connect(self.setting_provider.copy_json)
 
     def set_profile_list(self, file_name):
         self.ui.profile_list.addItem(file_name)
 
-    def set_profile_list_selected_item(self, index):
+    def set_profile_list_selected_item(self, index, file_name):
         self.ui.profile_list.setCurrentRow(index)
+        self.ui.selected_profile.setText(file_name)
+
+    def set_key_binding_table_row(self, row, function_code, gesture):
+        self.ui.key_binding_table.setRowCount(self.ui.key_binding_table.rowCount() + 1)
+        self.ui.key_binding_table.setItem(row, 0, QTableWidgetItem(str(function_code)))
+        self.ui.key_binding_table.setItem(row, 1, QTableWidgetItem(str(gesture[0])))
+        self.ui.key_binding_table.setItem(row, 2, QTableWidgetItem(str(gesture[1])))
 
     def set_profile_list_set_description(self, profile_name, description):
         self.ui.profile_name.setPlainText(profile_name)
