@@ -1062,29 +1062,40 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QToolButton" name="set_default_btn1">
-                   <property name="font">
-                    <font>
-                     <family>Adobe 黑体 Std R</family>
-                     <pointsize>14</pointsize>
-                    </font>
+                  <widget class="QGroupBox" name="profile_info_state_box">
+                   <property name="title">
+                    <string/>
                    </property>
-                   <property name="text">
-                    <string>設為預設</string>
-                   </property>
-                   <property name="icon">
-                    <iconset resource="res.qrc">
-                     <normaloff>:/icons/icons/default.png</normaloff>:/icons/icons/default.png</iconset>
-                   </property>
-                   <property name="iconSize">
-                    <size>
-                     <width>40</width>
-                     <height>40</height>
-                    </size>
-                   </property>
-                   <property name="toolButtonStyle">
-                    <enum>Qt::ToolButtonTextBesideIcon</enum>
-                   </property>
+                   <layout class="QFormLayout" name="formLayout_11">
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="profile_info_state_label">
+                      <property name="font">
+                       <font>
+                        <family>Adobe 黑体 Std R</family>
+                        <pointsize>14</pointsize>
+                        <weight>75</weight>
+                        <bold>true</bold>
+                       </font>
+                      </property>
+                      <property name="text">
+                       <string>狀態:</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="1">
+                     <widget class="QLabel" name="profile_info_state">
+                      <property name="font">
+                       <font>
+                        <family>Adobe 黑体 Std R</family>
+                        <pointsize>14</pointsize>
+                       </font>
+                      </property>
+                      <property name="text">
+                       <string>已儲存</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
                   </widget>
                  </item>
                 </layout>
@@ -1361,9 +1372,6 @@
                  <string/>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_10">
-                 <property name="leftMargin">
-                  <number>0</number>
-                 </property>
                  <item>
                   <widget class="QToolButton" name="save_btn">
                    <property name="font">
@@ -1378,6 +1386,32 @@
                    <property name="icon">
                     <iconset resource="res.qrc">
                      <normaloff>:/icons/icons/check.png</normaloff>:/icons/icons/check.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>40</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                   <property name="toolButtonStyle">
+                    <enum>Qt::ToolButtonTextBesideIcon</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QToolButton" name="del_key_btn">
+                   <property name="font">
+                    <font>
+                     <family>Adobe 黑体 Std R</family>
+                     <pointsize>14</pointsize>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>刪除</string>
+                   </property>
+                   <property name="icon">
+                    <iconset resource="res.qrc">
+                     <normaloff>:/icons/icons/minus.png</normaloff>:/icons/icons/minus.png</iconset>
                    </property>
                    <property name="iconSize">
                     <size>
@@ -1417,7 +1451,7 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QToolButton" name="set_default_btn2">
+                  <widget class="QToolButton" name="set_default_btn">
                    <property name="font">
                     <font>
                      <family>Adobe 黑体 Std R</family>
@@ -1430,6 +1464,32 @@
                    <property name="icon">
                     <iconset resource="res.qrc">
                      <normaloff>:/icons/icons/default.png</normaloff>:/icons/icons/default.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>40</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                   <property name="toolButtonStyle">
+                    <enum>Qt::ToolButtonTextBesideIcon</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QToolButton" name="caption_btn">
+                   <property name="font">
+                    <font>
+                     <family>Adobe 黑体 Std R</family>
+                     <pointsize>14</pointsize>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>說明</string>
+                   </property>
+                   <property name="icon">
+                    <iconset resource="res.qrc">
+                     <normaloff>:/icons/icons/book.png</normaloff>:/icons/icons/book.png</iconset>
                    </property>
                    <property name="iconSize">
                     <size>
@@ -2045,7 +2105,6 @@
   </widget>
  </widget>
  <resources>
-  <include location="res.qrc"/>
   <include location="res.qrc"/>
  </resources>
  <connections/>

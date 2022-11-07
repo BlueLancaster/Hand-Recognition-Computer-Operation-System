@@ -19,12 +19,13 @@ class MainController(QtWidgets.QMainWindow):
         self.setting_provider.trigger_read_file.connect(self.set_profile_list)
         self.setting_provider.trigger_selected.connect(self.set_profile_list_selected_item)
         self.setting_provider.trigger_info.connect(self.set_profile_list_set_description)
-        self.setting_provider.trigger_update_profile_list.connect(lambda num: self.ui.profile_list.clear())
+        self.setting_provider.trigger_clear_profile_list.connect(lambda: self.ui.profile_list.clear())
         self.setting_provider.trigger_update_key_binding.connect(self.set_key_binding_table_row)
+        self.setting_provider.trigger_clear_key_table.connect(lambda: self.ui.key_binding_table.clearContents())
         self.setting_provider.start()
 
         self.ui.profile_list.clicked.connect(
-            lambda: self.setting_provider.change_current_settings_file(self.ui.profile_list.currentRow()))
+            lambda: self.setting_provider.change_current_profile(self.ui.profile_list.currentRow()))
         self.ui.side_menu.enterEvent = self.side_menu_animation  # when mouse enters,animation takes place
         self.ui.side_menu.leaveEvent = self.side_menu_animation  # when mouse leaves,animation takes place
         # when button clicked, changing the page the stackedWidget displays
@@ -33,10 +34,27 @@ class MainController(QtWidgets.QMainWindow):
         self.ui.gesture_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(2))
         self.ui.setting_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(3))
         self.ui.apply_btn.clicked.connect(lambda: self.setting_provider.save_json(self.ui.profile_name.toPlainText(),
-                                                                                  self.ui.profile_description_context.toPlainText()))
+                                                                                  self.ui.profile_description_context
+                                                                                  .toPlainText()))
         self.ui.add_btn.clicked.connect(self.setting_provider.create_json)
         self.ui.del_btn.clicked.connect(self.setting_provider.del_json)
         self.ui.copy_btn.clicked.connect(self.setting_provider.copy_json)
+        self.ui.save_btn.clicked.connect(self.save_key_binding_setting)
+        self.ui.del_key_btn.clicked.connect(self.del_key)
+        self.ui.set_default_btn.clicked.connect(self.setting_provider.set_setting_default)
+
+    def del_key(self):
+        self.ui.key_binding_table.currentItem().setText('未設置')
+
+    def save_key_binding_setting(self):
+        new_settings = dict()
+        new_settings['Description'] = self.setting_provider.setting['Description']
+        for row in range(self.ui.key_binding_table.rowCount()):
+            function_code = int(self.ui.key_binding_table.item(row, 0).text())
+            left_hand = int((lambda text: text if text != '未設置' else '-1')(self.ui.key_binding_table.item(row, 1).text()))
+            right_hand = int((lambda text: text if text != '未設置' else '-1')(self.ui.key_binding_table.item(row, 2).text()))
+            new_settings[(left_hand, right_hand)] = function_code
+        self.setting_provider.update_key_settings(new_settings)
 
     def set_profile_list(self, file_name):
         self.ui.profile_list.addItem(file_name)
@@ -45,11 +63,13 @@ class MainController(QtWidgets.QMainWindow):
         self.ui.profile_list.setCurrentRow(index)
         self.ui.selected_profile.setText(file_name)
 
-    def set_key_binding_table_row(self, row, function_code, gesture):
-        self.ui.key_binding_table.setRowCount(self.ui.key_binding_table.rowCount() + 1)
-        self.ui.key_binding_table.setItem(row, 0, QTableWidgetItem(str(function_code)))
-        self.ui.key_binding_table.setItem(row, 1, QTableWidgetItem(str(gesture[0])))
-        self.ui.key_binding_table.setItem(row, 2, QTableWidgetItem(str(gesture[1])))
+    def set_key_binding_table_row(self, row, value):
+        if row == self.ui.key_binding_table.rowCount():
+            self.ui.key_binding_table.setRowCount(self.ui.key_binding_table.rowCount() + 1)
+        for i in range(3):
+            new_item = QTableWidgetItem((lambda: value[i] if int(value[i]) != -1 else '未設置')())
+            new_item.setTextAlignment(4)
+            self.ui.key_binding_table.setItem(row, i, new_item)
 
     def set_profile_list_set_description(self, profile_name, description):
         self.ui.profile_name.setPlainText(profile_name)
