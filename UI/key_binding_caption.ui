@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>412</width>
+    <height>630</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>綁定編碼說明</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="font">
+       <font>
+        <family>Adobe 黑体 Std R</family>
+       </font>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="function_code_tab">
+       <attribute name="title">
+        <string>功能編碼</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QGroupBox" name="groupBox">
+          <property name="font">
+           <font>
+            <family>Adobe 黑体 Std R</family>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="title">
+           <string>功能編碼說明:</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_4">
+           <item>
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>0:操作滑鼠模式 
+1:截圖文字辨識
+2:文字翻譯
+3:放大縮小
+4:全螢幕
+5:返回桌面 
+6:下一頁
+7:上一頁
+8:PPT 雷射筆 
+9:複製
+10:貼上
+11:順時針旋轉90度
+12:向上滑
+13:向下滑
+14:螢幕截圖
+15:滑鼠左鍵單點
+16:滑鼠右鍵單點
+17:進入雙手動態模式</string>
+             </property>
+             <property name="textFormat">
+              <enum>Qt::AutoText</enum>
+             </property>
+             <property name="wordWrap">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="gesture_code_tab">
+       <attribute name="title">
+        <string>手勢編碼</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item alignment="Qt::AlignTop">
+         <widget class="QGroupBox" name="groupBox_2">
+          <property name="font">
+           <font>
+            <family>Adobe 黑体 Std R</family>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="title">
+           <string>手勢編碼說明:</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <item>
+            <widget class="QLabel" name="label_2">
+             <property name="text">
+              <string>0:比五 
+1:握拳
+2:握拳後伸出食指
+3:握拳後食指和拇指尖端連起來 
+4:握拳後中指和拇指尖端連起來
+5:比二
+6:比六
+7:比八 </string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
