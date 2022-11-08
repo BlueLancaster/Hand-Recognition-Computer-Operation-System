@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/profile_switch.png</file>
     <file>icons/book.png</file>
     <file>icons/setting.png</file>
     <file>icons/check.png</file>

@@ -4,14 +4,15 @@ import PyQt5
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QTableWidgetItem
 
-from UI.MainWindow import Ui_MainWindow
+from UI.main_window import Ui_MainWindow as MainWindowUI
+from UI.key_binding_caption import Ui_MainWindow as CaptionWindowUI
 from utils.settings_provider import SettingsProvider
 
 
 class MainController(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
-        self.ui = Ui_MainWindow()  # set up UI
+        self.ui = MainWindowUI()  # set up UI
         self.ui.setupUi(self)  # initialize  ui and QtWidgets
         self.animation1 = None
         self.animation2 = None
@@ -24,6 +25,8 @@ class MainController(QtWidgets.QMainWindow):
         self.setting_provider.trigger_clear_key_table.connect(lambda: self.ui.key_binding_table.clearContents())
         self.setting_provider.start()
 
+        self.caption_window = QtWidgets.QMainWindow()
+
         self.ui.profile_list.clicked.connect(
             lambda: self.setting_provider.change_current_profile(self.ui.profile_list.currentRow()))
         self.ui.side_menu.enterEvent = self.side_menu_animation  # when mouse enters,animation takes place
@@ -33,26 +36,34 @@ class MainController(QtWidgets.QMainWindow):
         self.ui.profile_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(1))
         self.ui.gesture_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(2))
         self.ui.setting_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(3))
-        self.ui.apply_btn.clicked.connect(lambda: self.setting_provider.save_json(self.ui.profile_name.toPlainText(),
-                                                                                  self.ui.profile_description_context
-                                                                                  .toPlainText()))
+        self.ui.profile_save_btn.clicked.connect(
+            lambda: self.setting_provider.save_json(self.ui.profile_name.toPlainText(),
+                                                    self.ui.profile_description_context
+                                                    .toPlainText()))
+        self.ui.profile_apply_btn.clicked.connect(self.setting_provider.start)
         self.ui.add_btn.clicked.connect(self.setting_provider.create_json)
         self.ui.del_btn.clicked.connect(self.setting_provider.del_json)
         self.ui.copy_btn.clicked.connect(self.setting_provider.copy_json)
-        self.ui.save_btn.clicked.connect(self.save_key_binding_setting)
+        self.ui.key_save_btn.clicked.connect(self.save_key_binding_setting)
         self.ui.del_key_btn.clicked.connect(self.del_key)
         self.ui.set_default_btn.clicked.connect(self.setting_provider.set_setting_default)
+        self.ui.caption_btn.clicked.connect(self.open_caption_window)
 
     def del_key(self):
-        self.ui.key_binding_table.currentItem().setText('未設置')
+        if self.ui.key_binding_table.currentColumn() == 1 or self.ui.key_binding_table.currentColumn() == 2:
+            self.ui.key_binding_table.currentItem().setText('未設置')
+        else:
+            self.ui.key_binding_table.setCurrentItem(None)
 
     def save_key_binding_setting(self):
         new_settings = dict()
         new_settings['Description'] = self.setting_provider.setting['Description']
         for row in range(self.ui.key_binding_table.rowCount()):
             function_code = int(self.ui.key_binding_table.item(row, 0).text())
-            left_hand = int((lambda text: text if text != '未設置' else '-1')(self.ui.key_binding_table.item(row, 1).text()))
-            right_hand = int((lambda text: text if text != '未設置' else '-1')(self.ui.key_binding_table.item(row, 2).text()))
+            left_hand = int((lambda text: text if text != '未設置' else '-1')
+                            (self.ui.key_binding_table.item(row, 1).text()))
+            right_hand = int((lambda text: text if text != '未設置' else '-1')
+                             (self.ui.key_binding_table.item(row, 2).text()))
             new_settings[(left_hand, right_hand)] = function_code
         self.setting_provider.update_key_settings(new_settings)
 
@@ -102,3 +113,8 @@ class MainController(QtWidgets.QMainWindow):
         self.animation1.start()
         self.animation2.start()
         time.sleep(0.2)
+
+    def open_caption_window(self):
+        ui = CaptionWindowUI()
+        ui.setupUi(self.caption_window)
+        self.caption_window.show()

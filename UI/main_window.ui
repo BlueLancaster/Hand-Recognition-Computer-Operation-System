@@ -1033,7 +1033,7 @@
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_7">
                  <item>
-                  <widget class="QToolButton" name="apply_btn">
+                  <widget class="QToolButton" name="profile_apply_btn">
                    <property name="font">
                     <font>
                      <family>Adobe 黑体 Std R</family>
@@ -1045,6 +1045,35 @@
                    </property>
                    <property name="text">
                     <string>套用</string>
+                   </property>
+                   <property name="icon">
+                    <iconset resource="res.qrc">
+                     <normaloff>:/icons/icons/profile_switch.png</normaloff>:/icons/icons/profile_switch.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>40</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                   <property name="toolButtonStyle">
+                    <enum>Qt::ToolButtonTextBesideIcon</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QToolButton" name="profile_save_btn">
+                   <property name="font">
+                    <font>
+                     <family>Adobe 黑体 Std R</family>
+                     <pointsize>14</pointsize>
+                    </font>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true"/>
+                   </property>
+                   <property name="text">
+                    <string>儲存</string>
                    </property>
                    <property name="icon">
                     <iconset resource="res.qrc">
@@ -1373,7 +1402,7 @@
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_10">
                  <item>
-                  <widget class="QToolButton" name="save_btn">
+                  <widget class="QToolButton" name="key_save_btn">
                    <property name="font">
                     <font>
                      <family>Adobe 黑体 Std R</family>
