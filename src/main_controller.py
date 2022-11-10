@@ -20,6 +20,8 @@ class MainController(QtWidgets.QMainWindow):
         self.arg_provider = ArgumentProvider()
         self.arg_provider.trigger_load_arg_list.connect(self.set_arg_comboBox)
         self.arg_provider.trigger_selected.connect(self.set_selected_arg)
+        self.arg_provider.trigger_clear_list.connect(self.ui.arg_comboBox.clear)
+        self.arg_provider.trigger_load_arg.connect(self.set_arg)
         self.arg_provider.start()
 
         self.key_binding_provider = KeyBindingProvider()
@@ -34,7 +36,7 @@ class MainController(QtWidgets.QMainWindow):
         self.caption_window = QtWidgets.QMainWindow()
 
         self.ui.profile_list.clicked.connect(
-            lambda: self.key_binding_provider.change_current_profile(self.ui.profile_list.currentRow()))
+            lambda: self.key_binding_provider.change_current_file(self.ui.profile_list.currentRow()))
         self.ui.side_menu.enterEvent = self.side_menu_animation  # when mouse enters,animation takes place
         self.ui.side_menu.leaveEvent = self.side_menu_animation  # when mouse leaves,animation takes place
         # when button clicked, changing the page the stackedWidget displays
@@ -54,6 +56,31 @@ class MainController(QtWidgets.QMainWindow):
         self.ui.del_key_btn.clicked.connect(self.del_key)
         self.ui.set_default_btn.clicked.connect(self.key_binding_provider.set_setting_default)
         self.ui.caption_btn.clicked.connect(self.open_caption_window)
+
+        self.ui.arg_save_btn.clicked.connect(
+            lambda: self.save_arg(self.ui.arg_comboBox.currentText()))
+        self.ui.arg_comboBox.currentIndexChanged.connect(lambda: self.arg_provider.change_current_file(
+            self.ui.arg_comboBox.currentIndex()))
+        self.ui.arg_add_btn.clicked.connect(self.arg_provider.create_json)
+
+    def save_arg(self, new_file_name):
+        new_settings = {
+            'model_complexity': self.ui.model_complex_checkBox.isChecked(),
+            'min_detection_confidence': self.ui.detection_spinBox.value(),
+            'min_tracking_confidence': self.ui.tracking_spinBox.value(),
+            'smooth': self.ui.smooth_spinBox.value(),
+            'min_cutoff': self.ui.min_cutoff_SpinBox.value(),
+            'rate': self.ui.rate_spinBox.value()
+        }
+        self.arg_provider.update_arg_file(new_file_name, new_settings)
+
+    def set_arg(self, settings):
+        self.ui.smooth_spinBox.setValue(settings['smooth'])
+        self.ui.min_cutoff_SpinBox.setValue(settings['min_cutoff'])
+        self.ui.rate_spinBox.setValue(settings['rate'])
+        self.ui.model_complex_checkBox.setChecked(settings['model_complexity'])
+        self.ui.detection_spinBox.setValue(settings['min_detection_confidence'])
+        self.ui.tracking_spinBox.setValue(settings['min_tracking_confidence'])
 
     def set_arg_comboBox(self, index, file_name):
         self.ui.arg_comboBox.insertItem(index, file_name)

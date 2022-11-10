@@ -1797,7 +1797,7 @@
                      </widget>
                     </item>
                     <item>
-                     <widget class="QToolButton" name="arg_reset_btn">
+                     <widget class="QToolButton" name="arg_add_btn">
                       <property name="font">
                        <font>
                         <family>Adobe 黑体 Std R</family>
@@ -1805,11 +1805,11 @@
                        </font>
                       </property>
                       <property name="text">
-                       <string>重置</string>
+                       <string>新增</string>
                       </property>
                       <property name="icon">
                        <iconset resource="res.qrc">
-                        <normaloff>:/icons/icons/default.png</normaloff>:/icons/icons/default.png</iconset>
+                        <normaloff>:/icons/icons/plus.png</normaloff>:/icons/icons/plus.png</iconset>
                       </property>
                       <property name="iconSize">
                        <size>

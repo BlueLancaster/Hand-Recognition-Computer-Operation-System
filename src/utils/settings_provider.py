@@ -52,6 +52,9 @@ class SettingsProvider(QThread):
             self.create_json()
         self.start()
 
+    def change_current_file(self, index):
+        pass
+
     def read_file_list(self):
         """
         get all filenames under the path
@@ -121,7 +124,7 @@ class KeyBindingProvider(SettingsProvider):
                     settings['Description'] = self._settings[key]
         return settings
 
-    def change_current_profile(self, index):
+    def change_current_file(self, index):
         """
         change the current profile
         :param index: int
@@ -224,12 +227,17 @@ class ArgumentProvider(SettingsProvider):
     trigger_load_arg_list = pyqtSignal(int, str)
     trigger_update_arg = pyqtSignal(dict)
     trigger_selected = pyqtSignal(int)
+    trigger_clear_list = pyqtSignal(int)
+    trigger_load_arg = pyqtSignal(dict)
 
     def run(self):
+        self.read_file_list()
+        self.trigger_clear_list.emit(1)
         for index, file_name in enumerate(self._file_list):
             self.trigger_load_arg_list.emit(index, file_name)
             if file_name == self._file_name:
                 self.trigger_selected.emit(index)
+        self.trigger_load_arg.emit(self._settings)
 
     def set_setting_default(self):
         self.__set_default()
@@ -240,13 +248,26 @@ class ArgumentProvider(SettingsProvider):
         Set the settings default
         """
         self._settings = {
-            'model_complexity': 1,
+            'model_complexity': True,
             'min_detection_confidence': 0.7,
             'min_tracking_confidence': 0.5,
             'smooth': 5000,
             'min_cutoff': 2.0,
             'rate': 1.0
         }
+
+    def update_arg_file(self, new_file_name,  new_settings):
+        if self._file_name != new_file_name:
+            os.rename(self._file_path + self._file_name + '.json', self._file_path + new_file_name + '.json')
+            self._file_name = new_file_name
+        self._settings = new_settings
+        self.save_json()
+
+    def change_current_file(self, index):
+        if index != -1:
+            self._file_name = self._file_list[index]
+            self.read_json()
+            self.trigger_load_arg.emit(self._settings)
 
     def create_json(self):
         """
@@ -270,4 +291,3 @@ class ArgumentProvider(SettingsProvider):
             self.read_json()
         except IndexError:
             self.create_json()
-            self.read_file_list()
