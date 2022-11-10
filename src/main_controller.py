@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QTableWidgetItem
 
 from UI.main_window import Ui_MainWindow as MainWindowUI
 from UI.key_binding_caption import Ui_MainWindow as CaptionWindowUI
-from utils.settings_provider import SettingsProvider
+from utils.settings_provider import KeyBindingProvider, ArgumentProvider
 
 
 class MainController(QtWidgets.QMainWindow):
@@ -16,19 +16,25 @@ class MainController(QtWidgets.QMainWindow):
         self.ui.setupUi(self)  # initialize  ui and QtWidgets
         self.animation1 = None
         self.animation2 = None
-        self.setting_provider = SettingsProvider(1)
-        self.setting_provider.trigger_read_file.connect(self.set_profile_list)
-        self.setting_provider.trigger_selected.connect(self.set_profile_list_selected_item)
-        self.setting_provider.trigger_info.connect(self.set_profile_list_set_description)
-        self.setting_provider.trigger_clear_profile_list.connect(lambda: self.ui.profile_list.clear())
-        self.setting_provider.trigger_update_key_binding.connect(self.set_key_binding_table_row)
-        self.setting_provider.trigger_clear_key_table.connect(lambda: self.ui.key_binding_table.clearContents())
-        self.setting_provider.start()
+
+        self.arg_provider = ArgumentProvider()
+        self.arg_provider.trigger_load_arg_list.connect(self.set_arg_comboBox)
+        self.arg_provider.trigger_selected.connect(self.set_selected_arg)
+        self.arg_provider.start()
+
+        self.key_binding_provider = KeyBindingProvider()
+        self.key_binding_provider.trigger_load_profile_list.connect(self.set_profile_list)
+        self.key_binding_provider.trigger_selected.connect(self.set_profile_list_selected_item)
+        self.key_binding_provider.trigger_info.connect(self.set_profile_list_set_description)
+        self.key_binding_provider.trigger_clear_profile_list.connect(lambda: self.ui.profile_list.clear())
+        self.key_binding_provider.trigger_update_key_binding.connect(self.set_key_binding_table_row)
+        self.key_binding_provider.trigger_clear_key_table.connect(lambda: self.ui.key_binding_table.clearContents())
+        self.key_binding_provider.start()
 
         self.caption_window = QtWidgets.QMainWindow()
 
         self.ui.profile_list.clicked.connect(
-            lambda: self.setting_provider.change_current_profile(self.ui.profile_list.currentRow()))
+            lambda: self.key_binding_provider.change_current_profile(self.ui.profile_list.currentRow()))
         self.ui.side_menu.enterEvent = self.side_menu_animation  # when mouse enters,animation takes place
         self.ui.side_menu.leaveEvent = self.side_menu_animation  # when mouse leaves,animation takes place
         # when button clicked, changing the page the stackedWidget displays
@@ -37,17 +43,23 @@ class MainController(QtWidgets.QMainWindow):
         self.ui.gesture_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(2))
         self.ui.setting_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(3))
         self.ui.profile_save_btn.clicked.connect(
-            lambda: self.setting_provider.save_json(self.ui.profile_name.toPlainText(),
-                                                    self.ui.profile_description_context
-                                                    .toPlainText()))
-        self.ui.profile_apply_btn.clicked.connect(self.setting_provider.start)
-        self.ui.add_btn.clicked.connect(self.setting_provider.create_json)
-        self.ui.del_btn.clicked.connect(self.setting_provider.del_json)
-        self.ui.copy_btn.clicked.connect(self.setting_provider.copy_json)
+            lambda: self.key_binding_provider.save_json(self.ui.profile_name.toPlainText(),
+                                                        self.ui.profile_description_context
+                                                        .toPlainText()))
+        self.ui.profile_apply_btn.clicked.connect(self.key_binding_provider.start)
+        self.ui.add_btn.clicked.connect(self.key_binding_provider.create_json)
+        self.ui.del_btn.clicked.connect(self.key_binding_provider.del_json)
+        self.ui.copy_btn.clicked.connect(self.key_binding_provider.copy_json)
         self.ui.key_save_btn.clicked.connect(self.save_key_binding_setting)
         self.ui.del_key_btn.clicked.connect(self.del_key)
-        self.ui.set_default_btn.clicked.connect(self.setting_provider.set_setting_default)
+        self.ui.set_default_btn.clicked.connect(self.key_binding_provider.set_setting_default)
         self.ui.caption_btn.clicked.connect(self.open_caption_window)
+
+    def set_arg_comboBox(self, index, file_name):
+        self.ui.arg_comboBox.insertItem(index, file_name)
+
+    def set_selected_arg(self, index):
+        self.ui.arg_comboBox.setCurrentIndex(index)
 
     def del_key(self):
         if self.ui.key_binding_table.currentColumn() == 1 or self.ui.key_binding_table.currentColumn() == 2:
@@ -57,7 +69,7 @@ class MainController(QtWidgets.QMainWindow):
 
     def save_key_binding_setting(self):
         new_settings = dict()
-        new_settings['Description'] = self.setting_provider.setting['Description']
+        new_settings['Description'] = self.key_binding_provider.setting['Description']
         for row in range(self.ui.key_binding_table.rowCount()):
             function_code = int(self.ui.key_binding_table.item(row, 0).text())
             left_hand = int((lambda text: text if text != '未設置' else '-1')
@@ -65,7 +77,7 @@ class MainController(QtWidgets.QMainWindow):
             right_hand = int((lambda text: text if text != '未設置' else '-1')
                              (self.ui.key_binding_table.item(row, 2).text()))
             new_settings[(left_hand, right_hand)] = function_code
-        self.setting_provider.update_key_settings(new_settings)
+        self.key_binding_provider.update_settings(new_settings)
 
     def set_profile_list(self, file_name):
         self.ui.profile_list.addItem(file_name)
