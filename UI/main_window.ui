@@ -380,7 +380,7 @@
           </sizepolicy>
          </property>
          <property name="currentIndex">
-          <number>3</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="home_page">
           <layout class="QVBoxLayout" name="verticalLayout_18">
@@ -442,6 +442,12 @@
                   <width>640</width>
                   <height>480</height>
                  </size>
+                </property>
+                <property name="verticalScrollBarPolicy">
+                 <enum>Qt::ScrollBarAlwaysOff</enum>
+                </property>
+                <property name="horizontalScrollBarPolicy">
+                 <enum>Qt::ScrollBarAlwaysOff</enum>
                 </property>
                </widget>
               </item>
@@ -1690,6 +1696,9 @@
               <enum>QFrame::Raised</enum>
              </property>
              <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <property name="topMargin">
+               <number>0</number>
+              </property>
               <item alignment="Qt::AlignHCenter">
                <widget class="QFrame" name="video_area">
                 <property name="sizePolicy">
@@ -1715,10 +1724,10 @@
                   <number>0</number>
                  </property>
                  <property name="bottomMargin">
-                  <number>20</number>
+                  <number>15</number>
                  </property>
                  <item>
-                  <widget class="QFrame" name="setting_btn_area">
+                  <widget class="QFrame" name="setting_control_area">
                    <property name="frameShape">
                     <enum>QFrame::StyledPanel</enum>
                    </property>
@@ -1726,6 +1735,21 @@
                     <enum>QFrame::Raised</enum>
                    </property>
                    <layout class="QHBoxLayout" name="horizontalLayout_5">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
                     <item>
                      <widget class="QComboBox" name="arg_comboBox">
                       <property name="minimumSize">
@@ -1745,81 +1769,131 @@
                      </widget>
                     </item>
                     <item>
-                     <widget class="QToolButton" name="arg_save_btn">
-                      <property name="font">
-                       <font>
-                        <family>Adobe 黑体 Std R</family>
-                        <pointsize>14</pointsize>
-                       </font>
+                     <widget class="QFrame" name="setting_btn_area">
+                      <property name="frameShape">
+                       <enum>QFrame::StyledPanel</enum>
                       </property>
-                      <property name="text">
-                       <string>儲存</string>
+                      <property name="frameShadow">
+                       <enum>QFrame::Raised</enum>
                       </property>
-                      <property name="icon">
-                       <iconset resource="res.qrc">
-                        <normaloff>:/icons/icons/check.png</normaloff>:/icons/icons/check.png</iconset>
-                      </property>
-                      <property name="iconSize">
-                       <size>
-                        <width>40</width>
-                        <height>40</height>
-                       </size>
-                      </property>
-                      <property name="toolButtonStyle">
-                       <enum>Qt::ToolButtonTextBesideIcon</enum>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QToolButton" name="arg_test_btn">
-                      <property name="font">
-                       <font>
-                        <family>Adobe 黑体 Std R</family>
-                        <pointsize>14</pointsize>
-                       </font>
-                      </property>
-                      <property name="text">
-                       <string>測試</string>
-                      </property>
-                      <property name="icon">
-                       <iconset resource="res.qrc">
-                        <normaloff>:/icons/icons/try.png</normaloff>:/icons/icons/try.png</iconset>
-                      </property>
-                      <property name="iconSize">
-                       <size>
-                        <width>40</width>
-                        <height>40</height>
-                       </size>
-                      </property>
-                      <property name="toolButtonStyle">
-                       <enum>Qt::ToolButtonTextBesideIcon</enum>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QToolButton" name="arg_add_btn">
-                      <property name="font">
-                       <font>
-                        <family>Adobe 黑体 Std R</family>
-                        <pointsize>14</pointsize>
-                       </font>
-                      </property>
-                      <property name="text">
-                       <string>新增</string>
-                      </property>
-                      <property name="icon">
-                       <iconset resource="res.qrc">
-                        <normaloff>:/icons/icons/plus.png</normaloff>:/icons/icons/plus.png</iconset>
-                      </property>
-                      <property name="iconSize">
-                       <size>
-                        <width>40</width>
-                        <height>40</height>
-                       </size>
-                      </property>
-                      <property name="toolButtonStyle">
-                       <enum>Qt::ToolButtonTextBesideIcon</enum>
-                      </property>
+                      <layout class="QGridLayout" name="gridLayout_2">
+                       <property name="leftMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>0</number>
+                       </property>
+                       <item row="1" column="2">
+                        <widget class="QToolButton" name="arg_test_btn">
+                         <property name="font">
+                          <font>
+                           <family>Adobe 黑体 Std R</family>
+                           <pointsize>14</pointsize>
+                          </font>
+                         </property>
+                         <property name="text">
+                          <string>測試</string>
+                         </property>
+                         <property name="icon">
+                          <iconset resource="res.qrc">
+                           <normaloff>:/icons/icons/try.png</normaloff>:/icons/icons/try.png</iconset>
+                         </property>
+                         <property name="iconSize">
+                          <size>
+                           <width>40</width>
+                           <height>40</height>
+                          </size>
+                         </property>
+                         <property name="toolButtonStyle">
+                          <enum>Qt::ToolButtonTextBesideIcon</enum>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="3" column="2">
+                        <widget class="QToolButton" name="arg_del_btn">
+                         <property name="font">
+                          <font>
+                           <family>Adobe 黑体 Std R</family>
+                           <pointsize>14</pointsize>
+                          </font>
+                         </property>
+                         <property name="text">
+                          <string>刪除</string>
+                         </property>
+                         <property name="icon">
+                          <iconset resource="res.qrc">
+                           <normaloff>:/icons/icons/minus.png</normaloff>:/icons/icons/minus.png</iconset>
+                         </property>
+                         <property name="iconSize">
+                          <size>
+                           <width>40</width>
+                           <height>40</height>
+                          </size>
+                         </property>
+                         <property name="toolButtonStyle">
+                          <enum>Qt::ToolButtonTextBesideIcon</enum>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="1" column="1">
+                        <widget class="QToolButton" name="arg_save_btn">
+                         <property name="font">
+                          <font>
+                           <family>Adobe 黑体 Std R</family>
+                           <pointsize>14</pointsize>
+                          </font>
+                         </property>
+                         <property name="text">
+                          <string>儲存</string>
+                         </property>
+                         <property name="icon">
+                          <iconset resource="res.qrc">
+                           <normaloff>:/icons/icons/check.png</normaloff>:/icons/icons/check.png</iconset>
+                         </property>
+                         <property name="iconSize">
+                          <size>
+                           <width>40</width>
+                           <height>40</height>
+                          </size>
+                         </property>
+                         <property name="toolButtonStyle">
+                          <enum>Qt::ToolButtonTextBesideIcon</enum>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="3" column="1">
+                        <widget class="QToolButton" name="arg_add_btn">
+                         <property name="font">
+                          <font>
+                           <family>Adobe 黑体 Std R</family>
+                           <pointsize>14</pointsize>
+                          </font>
+                         </property>
+                         <property name="text">
+                          <string>新增</string>
+                         </property>
+                         <property name="icon">
+                          <iconset resource="res.qrc">
+                           <normaloff>:/icons/icons/plus.png</normaloff>:/icons/icons/plus.png</iconset>
+                         </property>
+                         <property name="iconSize">
+                          <size>
+                           <width>40</width>
+                           <height>40</height>
+                          </size>
+                         </property>
+                         <property name="toolButtonStyle">
+                          <enum>Qt::ToolButtonTextBesideIcon</enum>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
                      </widget>
                     </item>
                    </layout>
@@ -1838,6 +1912,12 @@
                      <width>480</width>
                      <height>360</height>
                     </size>
+                   </property>
+                   <property name="verticalScrollBarPolicy">
+                    <enum>Qt::ScrollBarAlwaysOff</enum>
+                   </property>
+                   <property name="horizontalScrollBarPolicy">
+                    <enum>Qt::ScrollBarAlwaysOff</enum>
                    </property>
                   </widget>
                  </item>

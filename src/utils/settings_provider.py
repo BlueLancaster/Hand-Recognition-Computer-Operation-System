@@ -243,6 +243,10 @@ class ArgumentProvider(SettingsProvider):
         self.__set_default()
         self.start()
 
+    @property
+    def settings(self):
+        return self._settings
+
     def __set_default(self):
         """
         Set the settings default

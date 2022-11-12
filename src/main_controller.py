@@ -2,20 +2,25 @@ import time
 
 import PyQt5
 from PyQt5 import QtWidgets, QtCore
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QTableWidgetItem
 
 from UI.main_window import Ui_MainWindow as MainWindowUI
 from UI.key_binding_caption import Ui_MainWindow as CaptionWindowUI
 from utils.settings_provider import KeyBindingProvider, ArgumentProvider
+from video_thread import VideoThread
 
 
 class MainController(QtWidgets.QMainWindow):
+
     def __init__(self):
         super().__init__()
         self.ui = MainWindowUI()  # set up UI
         self.ui.setupUi(self)  # initialize  ui and QtWidgets
         self.animation1 = None
         self.animation2 = None
+
+        self.ui.stackedWidget.setCurrentIndex(0)
 
         self.arg_provider = ArgumentProvider()
         self.arg_provider.trigger_load_arg_list.connect(self.set_arg_comboBox)
@@ -32,6 +37,9 @@ class MainController(QtWidgets.QMainWindow):
         self.key_binding_provider.trigger_update_key_binding.connect(self.set_key_binding_table_row)
         self.key_binding_provider.trigger_clear_key_table.connect(lambda: self.ui.key_binding_table.clearContents())
         self.key_binding_provider.start()
+
+        self.video_thread = VideoThread(self.get_arg())
+        self.video_thread.trigger.connect(self.video_display)
 
         self.caption_window = QtWidgets.QMainWindow()
 
@@ -62,9 +70,14 @@ class MainController(QtWidgets.QMainWindow):
         self.ui.arg_comboBox.currentIndexChanged.connect(lambda: self.arg_provider.change_current_file(
             self.ui.arg_comboBox.currentIndex()))
         self.ui.arg_add_btn.clicked.connect(self.arg_provider.create_json)
+        self.ui.arg_del_btn.clicked.connect(self.arg_provider.del_json)
+        self.ui.arg_test_btn.clicked.connect(self.video_start)
 
     def save_arg(self, new_file_name):
-        new_settings = {
+        self.arg_provider.update_arg_file(new_file_name, self.get_arg())
+
+    def get_arg(self):
+        return {
             'model_complexity': self.ui.model_complex_checkBox.isChecked(),
             'min_detection_confidence': self.ui.detection_spinBox.value(),
             'min_tracking_confidence': self.ui.tracking_spinBox.value(),
@@ -72,7 +85,6 @@ class MainController(QtWidgets.QMainWindow):
             'min_cutoff': self.ui.min_cutoff_SpinBox.value(),
             'rate': self.ui.rate_spinBox.value()
         }
-        self.arg_provider.update_arg_file(new_file_name, new_settings)
 
     def set_arg(self, settings):
         self.ui.smooth_spinBox.setValue(settings['smooth'])
@@ -157,3 +169,12 @@ class MainController(QtWidgets.QMainWindow):
         ui = CaptionWindowUI()
         ui.setupUi(self.caption_window)
         self.caption_window.show()
+
+    def video_start(self):
+        args = self.get_arg()
+        self.video_thread.update_settings(args)
+        self.video_thread.hand_capture.update_filter_arg(args['min_cutoff'], args['rate'])
+        self.video_thread.start()
+
+    def video_display(self, scene):
+        self.ui.video_graphicsView.setScene(scene)
