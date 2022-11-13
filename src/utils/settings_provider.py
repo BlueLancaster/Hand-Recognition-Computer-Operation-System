@@ -52,6 +52,10 @@ class SettingsProvider(QThread):
             self.create_json()
         self.start()
 
+    @property
+    def settings(self):
+        return self._settings
+
     def change_current_file(self, index):
         pass
 
@@ -242,10 +246,6 @@ class ArgumentProvider(SettingsProvider):
     def set_setting_default(self):
         self.__set_default()
         self.start()
-
-    @property
-    def settings(self):
-        return self._settings
 
     def __set_default(self):
         """

@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QTableWidgetItem
 from UI.main_window import Ui_MainWindow as MainWindowUI
 from UI.key_binding_caption import Ui_MainWindow as CaptionWindowUI
 from utils.settings_provider import KeyBindingProvider, ArgumentProvider
-from video_thread import VideoThread
+from threads import VideoThread, CamThread
 
 
 class MainController(QtWidgets.QMainWindow):
@@ -38,8 +38,10 @@ class MainController(QtWidgets.QMainWindow):
         self.key_binding_provider.trigger_clear_key_table.connect(lambda: self.ui.key_binding_table.clearContents())
         self.key_binding_provider.start()
 
-        self.video_thread = VideoThread(self.get_arg())
-        self.video_thread.trigger.connect(self.video_display)
+        self.video_thread = VideoThread(self.arg_provider.settings)
+        self.video_thread.trigger_display.connect(self.video_display)
+
+        self.cam_thread = CamThread(self.key_binding_provider.settings, self.arg_provider.settings)
 
         self.caption_window = QtWidgets.QMainWindow()
 
@@ -66,15 +68,16 @@ class MainController(QtWidgets.QMainWindow):
         self.ui.caption_btn.clicked.connect(self.open_caption_window)
 
         self.ui.arg_save_btn.clicked.connect(
-            lambda: self.save_arg(self.ui.arg_comboBox.currentText()))
+            lambda: self.save_arg(self.ui.arg_comboBox.currentText(), self.get_arg()))
         self.ui.arg_comboBox.currentIndexChanged.connect(lambda: self.arg_provider.change_current_file(
             self.ui.arg_comboBox.currentIndex()))
         self.ui.arg_add_btn.clicked.connect(self.arg_provider.create_json)
         self.ui.arg_del_btn.clicked.connect(self.arg_provider.del_json)
         self.ui.arg_test_btn.clicked.connect(self.video_start)
 
-    def save_arg(self, new_file_name):
-        self.arg_provider.update_arg_file(new_file_name, self.get_arg())
+    def save_arg(self, new_file_name, new_arg_settings):
+        self.arg_provider.update_arg_file(new_file_name, new_arg_settings)
+        self.cam_thread.update_arg_settings(new_arg_settings)
 
     def get_arg(self):
         return {
@@ -124,6 +127,8 @@ class MainController(QtWidgets.QMainWindow):
     def set_profile_list_selected_item(self, index, file_name):
         self.ui.profile_list.setCurrentRow(index)
         self.ui.selected_profile.setText(file_name)
+        self.ui.profile_seleted.setText(file_name)
+        self.cam_thread.update_key_binding(self.key_binding_provider.settings)
 
     def set_key_binding_table_row(self, row, value):
         if row == self.ui.key_binding_table.rowCount():
@@ -172,8 +177,7 @@ class MainController(QtWidgets.QMainWindow):
 
     def video_start(self):
         args = self.get_arg()
-        self.video_thread.update_settings(args)
-        self.video_thread.hand_capture.update_filter_arg(args['min_cutoff'], args['rate'])
+        self.video_thread.update_arg_settings(args)
         self.video_thread.start()
 
     def video_display(self, scene):
