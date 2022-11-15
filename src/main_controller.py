@@ -42,6 +42,9 @@ class MainController(QtWidgets.QMainWindow):
         self.video_thread.trigger_display.connect(self.video_display)
 
         self.cam_thread = CamThread(self.key_binding_provider.settings, self.arg_provider.settings)
+        self.cam_thread.trigger_display.connect(self.cam_display)
+        self.cam_thread.trigger_show_left_hand.connect(self.ui.left_hand_result_label.setText)
+        self.cam_thread.trigger_show_right_hand.connect(self.ui.right_hand_result_label.setText)
 
         self.caption_window = QtWidgets.QMainWindow()
 
@@ -54,6 +57,9 @@ class MainController(QtWidgets.QMainWindow):
         self.ui.profile_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(1))
         self.ui.gesture_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(2))
         self.ui.setting_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(3))
+
+        self.ui.power_btn.clicked.connect(self.cam_thread.switching_state)
+
         self.ui.profile_save_btn.clicked.connect(
             lambda: self.key_binding_provider.save_json(self.ui.profile_name.toPlainText(),
                                                         self.ui.profile_description_context
@@ -111,7 +117,7 @@ class MainController(QtWidgets.QMainWindow):
 
     def save_key_binding_setting(self):
         new_settings = dict()
-        new_settings['Description'] = self.key_binding_provider.setting['Description']
+        new_settings['Description'] = self.key_binding_provider.settings['Description']
         for row in range(self.ui.key_binding_table.rowCount()):
             function_code = int(self.ui.key_binding_table.item(row, 0).text())
             left_hand = int((lambda text: text if text != '未設置' else '-1')
@@ -182,3 +188,6 @@ class MainController(QtWidgets.QMainWindow):
 
     def video_display(self, scene):
         self.ui.video_graphicsView.setScene(scene)
+
+    def cam_display(self, scene):
+        self.ui.cam_graphicsView.setScene(scene)

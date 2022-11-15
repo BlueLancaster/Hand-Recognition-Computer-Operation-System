@@ -199,6 +199,8 @@ class Ui_MainWindow(object):
         self.cam_graphicsView = QtWidgets.QGraphicsView(self.cam_area)
         self.cam_graphicsView.setMinimumSize(QtCore.QSize(640, 480))
         self.cam_graphicsView.setMaximumSize(QtCore.QSize(640, 480))
+        self.cam_graphicsView.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.cam_graphicsView.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.cam_graphicsView.setObjectName("cam_graphicsView")
         self.horizontalLayout_8.addWidget(self.cam_graphicsView)
         self.verticalLayout_18.addWidget(self.cam_area)
@@ -1113,7 +1115,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
-        self.stackedWidget.setCurrentIndex(3)
+        self.stackedWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
