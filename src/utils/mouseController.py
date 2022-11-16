@@ -9,7 +9,7 @@ import win32con
 # ----moving variable----
 wScr, hScr = pyautogui.size()   # 返回电脑屏幕的宽和高(1920.0, 1080.0)
 wCam, hCam = 640, 480   # 视频显示窗口的宽和高
-moving_range = [(32, 64), (608, 416)]
+moving_range = [(5, 5), (581, 357)]
 # [(8,65),(632,415)]
 pt1, pt2 = moving_range[0], moving_range[1]   # 虚拟鼠标的移动范围，左上坐标pt1，右下坐标pt2
 smoothening = 7
@@ -18,8 +18,8 @@ smoothening = 7
 
 
 def mouse_moving(results, previous_pos=[]):
-    past_location_x = previous_pos[0]
-    past_location_y = previous_pos[1]
+    pastLocalation_x = previous_pos[0]
+    pastLocalation_y = previous_pos[1]
     if results.multi_hand_landmarks is not None:
         # print(type(results.multi_hand_landmarks))
         # 获取食指指尖坐标
@@ -41,7 +41,7 @@ def mouse_moving(results, previous_pos=[]):
         smoothen = 5000
 
         temp = np.array([x1, y1]) - \
-            np.array([past_location_x, past_location_y])
+            np.array([pastLocalation_x, pastLocalation_y])
         distance = math.hypot(temp[0], temp[1])
 
         temp[0] = temp[0]/2
@@ -49,18 +49,18 @@ def mouse_moving(results, previous_pos=[]):
 
         if distance > 20:
             for i in range(smoothen):
-                past_location_x = past_location_x + temp[0]/smoothen
-                past_location_y = past_location_y + temp[1]/smoothen
-                pos = (int(past_location_x), int(past_location_y))
+                pastLocalation_x = pastLocalation_x + temp[0]/smoothen
+                pastLocalation_y = pastLocalation_y + temp[1]/smoothen
+                pos = (int(pastLocalation_x), int(pastLocalation_y))
                 win32api.SetCursorPos(pos)
 
-            previous_pos[0] = past_location_x
-            previous_pos[1] = past_location_y
+            previous_pos[0] = pastLocalation_x
+            previous_pos[1] = pastLocalation_y
     return previous_pos
 
 
 def mouse(landmark_eight_x, landmark_eight_y):
-    past_location_x, past_location_y = win32api.GetCursorPos()
+    pastLocalation_x, pastLocalation_y = win32api.GetCursorPos()
     # print(type(results.multi_hand_landmarks))
     # 获取食指指尖坐标
     x1 = landmark_eight_x*wCam
@@ -75,21 +75,20 @@ def mouse(landmark_eight_x, landmark_eight_y):
 
     # （6）确定鼠标移动的范围
     # 将食指的移动范围从预制的窗口范围，映射到电脑屏幕范围
-    smoothen = 2
+    smoothen = 2000
 
     temp = np.array([x1, y1]) - \
-        np.array([past_location_x, past_location_y])
+        np.array([pastLocalation_x, pastLocalation_y])
     distance = math.hypot(temp[0], temp[1])
 
-    temp[0] = temp[0]/2/smoothen
-    temp[1] = temp[1]/2/smoothen
+    temp[0] = temp[0]/smoothen
+    temp[1] = temp[1]/smoothen
 
-    if distance > 10:
-        for i in range(smoothen):
-            past_location_x = past_location_x + temp[0]
-            past_location_y = past_location_y + temp[1]
-            pos = (int(past_location_x), int(past_location_y))
-            win32api.SetCursorPos(pos)
+    for i in range(smoothen):
+        pastLocalation_x = pastLocalation_x + temp[0]
+        pastLocalation_y = pastLocalation_y + temp[1]
+        pos = (int(pastLocalation_x), int(pastLocalation_y))
+        win32api.SetCursorPos(pos)
 
 
 def test(arg):

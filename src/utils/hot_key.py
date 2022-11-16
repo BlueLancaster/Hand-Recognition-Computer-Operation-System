@@ -14,6 +14,10 @@ import pytesseract
 from PIL import ImageGrab
 
 
+def main():
+    OCR()
+
+
 def screenShot():
     pyautogui.keyDown('shift')
     pyautogui.keyDown('winleft')
@@ -32,6 +36,9 @@ def paste():
 0: move_mouse
 1: left click
 2: right click
+
+
+
 """
 
 
@@ -52,17 +59,22 @@ def translate(data):
     pyperclip.copy(results.text)
 
 
-def scroll():
+def scroll_up():
     pyautogui.scroll(100)
 
 
+def scroll_down():
+    pyautogui.scroll(-100)
+
+
 def adjust_size(distance, past_distance):
-    if distance / past_distance < 0.9:
+
+    if distance/past_distance < 0.9:
         win32api.keybd_event(17, 0, 0, 0)  # 按下Ctrl鍵
         win32api.keybd_event(187, 0, 0, 0)  # 按下s鍵
         win32api.keybd_event(187, 0, win32con.KEYEVENTF_KEYUP, 0)  # 釋放Ctrl鍵
         win32api.keybd_event(17, 0, win32con.KEYEVENTF_KEYUP, 0)
-    elif distance / past_distance > 1.1:
+    elif distance/past_distance > 1.1:
         win32api.keybd_event(17, 0, 0, 0)  # 按下Ctrl鍵
         win32api.keybd_event(189, 0, 0, 0)  # 按下s鍵
         win32api.keybd_event(189, 0, win32con.KEYEVENTF_KEYUP, 0)  # 釋放Ctrl鍵
@@ -94,4 +106,16 @@ def PPT_full_screen():
     pyautogui.press('s')
     pyautogui.press('b')
     pyautogui.keyUp('alt')
+
+
+def copy_mode():
+    pyautogui.keyDown('ctrl')
+    pyautogui.press('v')
+    pyautogui.keyUp('ctrl')
+
+
+def paste():
+    pyautogui.keyDown('ctrl')
+    pyautogui.press('c')
+    pyautogui.keyUp('ctrl')
 

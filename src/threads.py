@@ -17,8 +17,9 @@ from utils.cam_thread_tool import read_labels, calc_bounding_rect, calc_landmark
     pre_process_point_history, get_distance
 from utils.cvfpscalc import CvFpsCalc
 from utils.drawing import draw_info_text, draw_bounding_rect, draw_moving_range, draw_point_history, draw_info
-from utils.hot_key import PPT_full_screen, back_desktop, adjust_size
-from utils.mouseController import left_up, mouse, mouse_moving, left_down
+from utils.hot_key import PPT_full_screen, back_desktop, adjust_size, scroll_down, scroll_up, paste, copy_mode, \
+    PPT_razer
+from utils.mouseController import left_up, mouse, mouse_moving, left_down, right_click
 from utils.one_euro_filter import *
 from utils.textshot import screenshot1
 
@@ -123,6 +124,7 @@ class CamThread(QThread):
         # <--- double hands gesture history --->
         self.double_hands_history_length = 32
         self.double_hands_history = deque(maxlen=self.double_hands_history_length)
+        self.pre_processed_double_hands_history_list = []
         self.landmark_eight_left = [0, 0]
         self.landmark_eight_right = [0, 0]
 
@@ -187,20 +189,20 @@ class CamThread(QThread):
                     hand_sign_id = self.single_hand_classifier(pre_processed_landmark_list)
                     # single most setting
                     if len(results.multi_hand_landmarks) == 2:
-                        pre_processed_double_hands_history_list = pre_process_point_history(debug_frame,
-                                                                                            self.double_hands_history)
+                        self.pre_processed_double_hands_history_list = pre_process_point_history(debug_frame,
+                                                                                                 self.double_hands_history)
                     if handedness.classification[0].label == 'Left':
                         self.left_single_hand_history.append(hand_sign_id)
                         self.most_common_left_handID = Counter(self.left_single_hand_history).most_common(1)[0][0]
                         two_handID[0] = self.most_common_left_handID
-                        landmark_eight_left = [
+                        self.landmark_eight_left = [
                             landmark_list[8][0], landmark_list[8][1]]
 
                     else:
                         self.right_single_hand_history.append(hand_sign_id)
                         self.most_common_right_handID = Counter(self.right_single_hand_history).most_common(1)[0][0]
                         two_handID[1] = self.most_common_right_handID
-                        landmark_eight_right = [
+                        self.landmark_eight_right = [
                             landmark_list[8][0], landmark_list[8][1]]
 
                     # Drawing part
@@ -218,8 +220,8 @@ class CamThread(QThread):
                         handedness,
                         self.single_hand_classifier_labels[
                             (lambda: self.most_common_left_handID
-                                if handedness.classification[0].label == 'Left'
-                                else self.most_common_right_handID)()],
+                            if handedness.classification[0].label == 'Left'
+                            else self.most_common_right_handID)()],
                         "",
                     )
 
@@ -239,20 +241,20 @@ class CamThread(QThread):
                     left_up()
                     mouse(results.multi_hand_landmarks[0].landmark[6].x,
                           results.multi_hand_landmarks[0].landmark[6].y)
-                """
+
                 elif function_mode == 17:  # two hand dynamic
                     self.double_hands_history.append(self.landmark_eight_left)
                     self.double_hands_history.append(self.landmark_eight_right)
                     # print(double_hands_history)
-                    if len(pre_processed_double_hands_history_list) == (self.double_hands_history_length * 2):
-                        double_hands_id = self.double_hands_classifier(pre_processed_double_hands_history_list)
+                    if len(self.pre_processed_double_hands_history_list) == (self.double_hands_history_length * 2):
+                        double_hands_id = self.double_hands_classifier(self.pre_processed_double_hands_history_list)
                         if double_hands_id == 0:
                             print(00)
                             PPT_full_screen()
                         elif double_hands_id == 1:
                             print(11)
                             back_desktop()
-                """
+
                 if time.time() - self.last_execution_time < 0.1:
                     pass
                 else:
@@ -268,11 +270,22 @@ class CamThread(QThread):
                         # translate()
                     elif function_mode == 3 and self.key_binding.get(tuple(self.last_two_handID)) == 3:
                         adjust_size(distance, self.past_distance)
+                    elif function_mode == 8:
+                        PPT_razer()
+                    elif function_mode == 9:
+                        copy_mode()
+                    elif function_mode == 10:
+                        paste()
+                    elif function_mode == 12:
+                        scroll_up()
+                    elif function_mode == 13:
+                        scroll_down()
                     elif function_mode == 15:
                         self.previous_pos = mouse_moving(results, self.previous_pos)
                         if self.key_binding.get(tuple(self.last_two_handID)) != 15:
                             left_down()
-
+                    elif function_mode == 16:
+                        right_click()
                     self.last_execution_time = time.time()
                     self.past_distance = distance
                     self.last_two_handID = two_handID
@@ -346,4 +359,3 @@ class CamThread(QThread):
             return "滑鼠右鍵單點"
         elif code == 17:
             return "進入雙手動態模式"
-
