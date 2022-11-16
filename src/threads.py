@@ -1,5 +1,6 @@
 import copy
 import multiprocessing
+import time
 from collections import deque, Counter
 
 import cv2 as cv
@@ -13,10 +14,13 @@ from model.double_hands_classifier.double_hands_classifier import DoubleHandsCla
 from model.single_hand_classifier.single_hand_classifier import SingleHandClassifier
 from model.landmark_eight_history_classifier.landmark_eight_history_classifier import LandmarkEightHistoryClassifier
 from utils.cam_thread_tool import read_labels, calc_bounding_rect, calc_landmark_list, pre_process_landmark, \
-    pre_process_point_history
+    pre_process_point_history, get_distance
 from utils.cvfpscalc import CvFpsCalc
 from utils.drawing import draw_info_text, draw_bounding_rect, draw_moving_range, draw_point_history, draw_info
+from utils.hot_key import PPT_full_screen, back_desktop, adjust_size
+from utils.mouseController import left_up, mouse, mouse_moving, left_down
 from utils.one_euro_filter import *
+from utils.textshot import screenshot1
 
 
 class VideoThread(QThread):
@@ -138,7 +142,8 @@ class CamThread(QThread):
         self.past_distance = 1
 
     def run(self):
-        #sub_process = multiprocessing.Process(target=screenshot1)
+        print('run start')
+        sub_process = multiprocessing.Process(target=screenshot1)
         while self.__cam.isOpened() and self.switch_state:
             fps = self.fps_cal.get()
             success, frame = self.__cam.read()
@@ -148,9 +153,8 @@ class CamThread(QThread):
 
             if self.flip_mode != 2:
                 frame = cv.flip(frame, self.flip_mode)  # Mirror display
-
-            debug_frame = copy.deepcopy(frame)
             frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
+            debug_frame = copy.deepcopy(frame)
             frame.flags.writeable = False
             results = self.__hands.process(cv.cvtColor(frame, cv.COLOR_BGR2RGB))
             frame.flags.writeable = True
@@ -171,7 +175,7 @@ class CamThread(QThread):
                             landmarks.y = pre_joints[i][1]
                             landmarks.z = pre_joints[i][2]
                     # Bounding box calculation
-                    brect = calc_bounding_rect(debug_frame, hand_landmarks)
+                    rect = calc_bounding_rect(debug_frame, hand_landmarks)
                     # Landmark calculation
                     landmark_list = calc_landmark_list(debug_frame, hand_landmarks)
                     # Conversion to relative coordinates / normalized coordinates
@@ -200,7 +204,7 @@ class CamThread(QThread):
                             landmark_list[8][0], landmark_list[8][1]]
 
                     # Drawing part
-                    debug_frame = draw_bounding_rect(self.use_rect, debug_frame, brect)
+                    debug_frame = draw_bounding_rect(self.use_rect, debug_frame, rect)
                     self.mp_drawing.draw_landmarks(
                         debug_frame,
                         hand_landmarks,
@@ -208,20 +212,70 @@ class CamThread(QThread):
                         self.mp_drawing_styles.get_default_hand_landmarks_style(),
                         self.mp_drawing_styles.get_default_hand_connections_style())
 
-                      # Because of unknown reason, handedness.classification would be out of index
                     draw_info_text(
                         debug_frame,
-                        brect,
+                        rect,
                         handedness,
-                        self.single_hand_classifier_labels[(lambda: self.most_common_left_handID if handedness.classification[0].label == 'Left' else self.most_common_right_handID)()],
+                        self.single_hand_classifier_labels[
+                            (lambda: self.most_common_left_handID
+                                if handedness.classification[0].label == 'Left'
+                                else self.most_common_right_handID)()],
                         "",
                     )
 
                     # update UI gesture result and function called
                     if handedness.classification[0].label == 'Left':
-                        self.trigger_show_left_hand.emit(self.single_hand_classifier_labels[self.most_common_left_handID])
+                        self.trigger_show_left_hand.emit(self.
+                                                         single_hand_classifier_labels[self.most_common_left_handID])
                     else:
-                        self.trigger_show_right_hand.emit(self.single_hand_classifier_labels[self.most_common_right_handID])
+                        self.trigger_show_right_hand.emit(self.
+                                                          single_hand_classifier_labels[self.most_common_right_handID])
+                # get the function binding on keys
+                function_mode = self.key_binding.get(tuple(two_handID))
+                self.trigger_show_func.emit(self.function_label(function_mode))
+
+                # do  something corresponding to function code
+                if function_mode == 0:  # Point gesture
+                    left_up()
+                    mouse(results.multi_hand_landmarks[0].landmark[6].x,
+                          results.multi_hand_landmarks[0].landmark[6].y)
+                """
+                elif function_mode == 17:  # two hand dynamic
+                    self.double_hands_history.append(self.landmark_eight_left)
+                    self.double_hands_history.append(self.landmark_eight_right)
+                    # print(double_hands_history)
+                    if len(pre_processed_double_hands_history_list) == (self.double_hands_history_length * 2):
+                        double_hands_id = self.double_hands_classifier(pre_processed_double_hands_history_list)
+                        if double_hands_id == 0:
+                            print(00)
+                            PPT_full_screen()
+                        elif double_hands_id == 1:
+                            print(11)
+                            back_desktop()
+                """
+                if time.time() - self.last_execution_time < 0.1:
+                    pass
+                else:
+                    distance = get_distance(
+                        results, 640, 480)
+                    if function_mode == 1:
+                        if sub_process.is_alive():
+                            pass
+                        else:
+                            sub_process.start()
+                    elif function_mode == 2:
+                        pass
+                        # translate()
+                    elif function_mode == 3 and self.key_binding.get(tuple(self.last_two_handID)) == 3:
+                        adjust_size(distance, self.past_distance)
+                    elif function_mode == 15:
+                        self.previous_pos = mouse_moving(results, self.previous_pos)
+                        if self.key_binding.get(tuple(self.last_two_handID)) != 15:
+                            left_down()
+
+                    self.last_execution_time = time.time()
+                    self.past_distance = distance
+                    self.last_two_handID = two_handID
 
             else:
                 self.dynamic_gesture_history.append([0, 0])
@@ -253,4 +307,43 @@ class CamThread(QThread):
         else:
             self.switch_state = True
             self.start()
+
+    @staticmethod
+    def function_label(code):
+        if code == 0:
+            return "操作滑鼠模式"
+        elif code == 1:
+            return "截圖文字辨識"
+        elif code == 2:
+            return "文字翻譯"
+        elif code == 3:
+            return "放大縮小"
+        elif code == 4:
+            return "全螢幕"
+        elif code == 5:
+            return "返回桌面"
+        elif code == 6:
+            return "下一頁"
+        elif code == 7:
+            return "上一頁"
+        elif code == 8:
+            return "PPT 雷射筆"
+        elif code == 9:
+            return "複製"
+        elif code == 10:
+            return "貼上"
+        elif code == 11:
+            return "順時針旋轉90度"
+        elif code == 12:
+            return "向上滑"
+        elif code == 13:
+            return "向下滑"
+        elif code == 14:
+            return "螢幕截圖"
+        elif code == 15:
+            return "滑鼠左鍵單點"
+        elif code == 16:
+            return "滑鼠右鍵單點"
+        elif code == 17:
+            return "進入雙手動態模式"
 

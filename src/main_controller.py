@@ -45,6 +45,7 @@ class MainController(QtWidgets.QMainWindow):
         self.cam_thread.trigger_display.connect(self.cam_display)
         self.cam_thread.trigger_show_left_hand.connect(self.ui.left_hand_result_label.setText)
         self.cam_thread.trigger_show_right_hand.connect(self.ui.right_hand_result_label.setText)
+        self.cam_thread.trigger_show_func.connect(self.ui.func_result_label.setText)
 
         self.caption_window = QtWidgets.QMainWindow()
 
@@ -64,7 +65,7 @@ class MainController(QtWidgets.QMainWindow):
             lambda: self.key_binding_provider.save_json(self.ui.profile_name.toPlainText(),
                                                         self.ui.profile_description_context
                                                         .toPlainText()))
-        self.ui.profile_apply_btn.clicked.connect(self.key_binding_provider.start)
+        self.ui.profile_apply_btn.clicked.connect(self.apply_profile)
         self.ui.add_btn.clicked.connect(self.key_binding_provider.create_json)
         self.ui.del_btn.clicked.connect(self.key_binding_provider.del_json)
         self.ui.copy_btn.clicked.connect(self.key_binding_provider.copy_json)
@@ -84,6 +85,10 @@ class MainController(QtWidgets.QMainWindow):
     def save_arg(self, new_file_name, new_arg_settings):
         self.arg_provider.update_arg_file(new_file_name, new_arg_settings)
         self.cam_thread.update_arg_settings(new_arg_settings)
+
+    def apply_profile(self):
+        self.key_binding_provider.start()
+        self.cam_thread.update_key_binding(self.key_binding_provider.settings)
 
     def get_arg(self):
         return {
