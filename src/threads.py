@@ -20,11 +20,14 @@ from utils.drawing import draw_info_text, draw_bounding_rect, draw_moving_range,
 from utils.hot_key import PPT_full_screen, back_desktop, adjust_size, scroll_down, scroll_up, paste, copy_mode, \
     PPT_razer
 from utils.mouseController import left_up, mouse, mouse_moving, left_down, right_click
-from utils.one_euro_filter import *
+from utils.one_euro_filter import HandCapture
 from utils.textshot import screenshot1
 
 
 class VideoThread(QThread):
+    """
+    a thread for playing the video in order to test the effect of the arguments and mediapipe
+    """
     trigger_display = pyqtSignal(QGraphicsScene)
     trigger_left_gesture = pyqtSignal(str)
     trigger_right_gesture = pyqtSignal(str)
@@ -33,7 +36,6 @@ class VideoThread(QThread):
     mp_hands = mp.solutions.hands
 
     def __init__(self, arg_settings):
-        # 初始化函数
         super(VideoThread, self).__init__()
         self.__video = cv.VideoCapture('../video/test.mp4')
         if self.__video.isOpened():
@@ -152,13 +154,12 @@ class CamThread(QThread):
             if not success:
                 print("Ignoring empty camera frame.")
                 break
-
             if self.flip_mode != 2:
                 frame = cv.flip(frame, self.flip_mode)  # Mirror display
             frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
             debug_frame = copy.deepcopy(frame)
             frame.flags.writeable = False
-            results = self.__hands.process(cv.cvtColor(frame, cv.COLOR_BGR2RGB))
+            results = self.__hands.process(frame)
             frame.flags.writeable = True
             two_handID = [-1, -1]
             if results.multi_hand_landmarks:
@@ -181,8 +182,7 @@ class CamThread(QThread):
                     # Landmark calculation
                     landmark_list = calc_landmark_list(debug_frame, hand_landmarks)
                     # Conversion to relative coordinates / normalized coordinates
-                    pre_processed_landmark_list = pre_process_landmark(
-                        debug_frame, landmark_list)
+                    pre_processed_landmark_list = pre_process_landmark(landmark_list)
                     pre_processed_point_history_list = pre_process_point_history(
                         debug_frame, self.landmark_eight_history)
                     # Hand sign classification
@@ -262,7 +262,7 @@ class CamThread(QThread):
                         results, 640, 480)
                     if function_mode == 1:
                         if sub_process.is_alive():
-                            pass
+                            print('sub process is alive')
                         else:
                             sub_process.start()
                     elif function_mode == 2:

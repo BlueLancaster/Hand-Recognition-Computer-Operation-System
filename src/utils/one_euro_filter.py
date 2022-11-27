@@ -2,6 +2,9 @@ import numpy as np
 
 
 class LowPassFilter:
+    """
+    main filter that use exponential smoothing
+    """
     def __init__(self):
         self.prev_raw_value = None
         self.prev_filtered_value = None
@@ -17,6 +20,9 @@ class LowPassFilter:
 
 
 class OneEuroFilter:
+    """
+    Initialize the one euro filter.
+    """
     def __init__(self, min_cutoff=1.0, beta=0.0, d_cutoff=1.0, freq=30):
         self.freq = freq
         self.min_cutoff = min_cutoff
@@ -39,6 +45,9 @@ class OneEuroFilter:
 
 
 class HandCapture:
+    """
+    compute the smoothing factor
+    """
     def __init__(self):
         self.point_filter = OneEuroFilter(4.0, 0.0)
         self.pre_joints = list()
@@ -47,6 +56,11 @@ class HandCapture:
         self.point_filter = OneEuroFilter(min_cutoff, beta_rate)
 
     def process(self, hand_landmarks):
+        """
+        dx : The rate of change
+        edx : The filtered rate of change
+        cutoff : The cutoff frequency
+        """
         self.pre_joints = list()
         for index, landmark in enumerate(hand_landmarks.landmark):
             self.pre_joints.append([landmark.x, landmark.y, landmark.z])
@@ -54,17 +68,3 @@ class HandCapture:
         self.pre_joints = self.point_filter.process(
             self.pre_joints)  # filter the jitter joints
         return self.pre_joints
-
-
-"""        
-    def filterHandJoints(self):
-        self.pre_joints = np.array(self.pre_joints)
-    for index, landmark in enumerate(hand_landmarks.landmark):
-             self.pre_joints = self.point_filter.process(
-            self.pre_joints)  # filter the jitter joints
-        return self.pre_joints
-
-    def handJoints(self, hand_landmarks):
-        self.pre_joints.clear()
-           self.pre_joints.append([landmark.x, landmark.y, landmark.z])
-"""

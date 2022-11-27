@@ -63,36 +63,32 @@ def calc_landmark_list(image, landmarks):
     return landmark_point
 
 
-def pre_process_landmark(image, landmark_list):
-    image_width, image_height = image.shape[1], image.shape[0]
+def pre_process_landmark(landmark_list):
     temp_landmark_list = copy.deepcopy(landmark_list)
-
+    # landmark_list 為int且為在圖片上座標
     # Convert to relative coordinates
     base_x, base_y, base_z = 0, 0, 0
+
     for index, landmark_point in enumerate(temp_landmark_list):
         if index == 0:
             base_x, base_y, base_z = landmark_point[0], landmark_point[1], landmark_point[2]
-
-        temp_landmark_list[index][0] = (
-                                               temp_landmark_list[index][0] - base_x) / image_width
-        temp_landmark_list[index][1] = (
-                                               temp_landmark_list[index][1] - base_y) / image_height
+        temp_landmark_list[index][0] = (temp_landmark_list[index][0] - base_x)
+        temp_landmark_list[index][1] = (temp_landmark_list[index][1] - base_y)
         temp_landmark_list[index][2] = temp_landmark_list[index][2] - base_z
+
+    def length(landmarks):
+        return math.sqrt(landmarks[0] * landmarks[0] + landmarks[1] * landmarks[1])
+
+    max_value = max(list(map(length, temp_landmark_list)))
+
+    for index, landmark_point in enumerate(temp_landmark_list):
+        temp_landmark_list[index][0] = temp_landmark_list[index][0]/max_value
+        temp_landmark_list[index][1] = temp_landmark_list[index][1]/max_value
 
     # Convert to a one-dimensional list
     temp_landmark_list = list(
         itertools.chain.from_iterable(temp_landmark_list))
 
-    """
-    # Normalization
-    max_value = max(list(map(abs, temp_landmark_list)))
-
-    def normalize_(n):
-        return n / max_value
-
-
-    temp_landmark_list = list(map(normalize_, temp_landmark_list))
-    """
     return temp_landmark_list
 
 
@@ -117,6 +113,7 @@ def pre_process_point_history(image, point_history):
         itertools.chain.from_iterable(temp_point_history))
 
     return temp_point_history
+
 
 def record(number, mode):
     if mode == 3 and (0 <= number <= 9):

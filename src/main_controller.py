@@ -15,82 +15,65 @@ class MainController(QtWidgets.QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.ui = MainWindowUI()  # set up UI
-        self.ui.setupUi(self)  # initialize  ui and QtWidgets
+        self.ui = MainWindowUI()  # Set up UI
+        self.ui.setupUi(self)  # Initialize  ui and QtWidgets
         self.animation1 = None
         self.animation2 = None
-
+        # Initialize main_window
+        self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+        self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
         self.ui.stackedWidget.setCurrentIndex(0)
-
+        # Initialize each provider and each thread
         self.arg_provider = ArgumentProvider()
-        self.arg_provider.trigger_load_arg_list.connect(self.set_arg_comboBox)
-        self.arg_provider.trigger_selected.connect(self.set_selected_arg)
-        self.arg_provider.trigger_clear_list.connect(self.ui.arg_comboBox.clear)
-        self.arg_provider.trigger_load_arg.connect(self.set_arg)
-        self.arg_provider.start()
+        self.argument_provider_connect_init()
 
         self.key_binding_provider = KeyBindingProvider()
-        self.key_binding_provider.trigger_load_profile_list.connect(self.set_profile_list)
-        self.key_binding_provider.trigger_selected.connect(self.set_profile_list_selected_item)
-        self.key_binding_provider.trigger_info.connect(self.set_profile_list_set_description)
-        self.key_binding_provider.trigger_clear_profile_list.connect(lambda: self.ui.profile_list.clear())
-        self.key_binding_provider.trigger_update_key_binding.connect(self.set_key_binding_table_row)
-        self.key_binding_provider.trigger_clear_key_table.connect(lambda: self.ui.key_binding_table.clearContents())
-        self.key_binding_provider.start()
+        self.key_binding_provider_connect_init()
 
         self.video_thread = VideoThread(self.arg_provider.settings)
-        self.video_thread.trigger_display.connect(self.video_display)
+        self.video_thread_connect_init()
 
         self.cam_thread = CamThread(self.key_binding_provider.settings, self.arg_provider.settings)
-        self.cam_thread.trigger_display.connect(self.cam_display)
-        self.cam_thread.trigger_show_left_hand.connect(self.ui.left_hand_result_label.setText)
-        self.cam_thread.trigger_show_right_hand.connect(self.ui.right_hand_result_label.setText)
-        self.cam_thread.trigger_show_func.connect(self.ui.func_result_label.setText)
-
+        self.cam_thread_connect_init()
+        # Initialize the events binding of side_menu and each page in StackedWidget
+        # The events are clickEvent,enterEvent,...etc
+        self.side_menu_connect_init()
+        self.home_page_init()
+        self.profile_page_connect_init()
+        self.key_binding_page_connect_init()
+        self.argument_page_connect_init()
         self.caption_window = QtWidgets.QMainWindow()
 
-        self.ui.profile_list.clicked.connect(
-            lambda: self.key_binding_provider.change_current_file(self.ui.profile_list.currentRow()))
-        self.ui.side_menu.enterEvent = self.side_menu_animation  # when mouse enters,animation takes place
-        self.ui.side_menu.leaveEvent = self.side_menu_animation  # when mouse leaves,animation takes place
-        # when button clicked, changing the page the stackedWidget displays
-        self.ui.home_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(0))
-        self.ui.profile_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(1))
-        self.ui.gesture_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(2))
-        self.ui.setting_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(3))
-
-        self.ui.power_btn.clicked.connect(self.cam_thread.switching_state)
-
-        self.ui.profile_save_btn.clicked.connect(
-            lambda: self.key_binding_provider.save_json(self.ui.profile_name.toPlainText(),
-                                                        self.ui.profile_description_context
-                                                        .toPlainText()))
-        self.ui.profile_apply_btn.clicked.connect(self.apply_profile)
-        self.ui.add_btn.clicked.connect(self.key_binding_provider.create_json)
-        self.ui.del_btn.clicked.connect(self.key_binding_provider.del_json)
-        self.ui.copy_btn.clicked.connect(self.key_binding_provider.copy_json)
-        self.ui.key_save_btn.clicked.connect(self.save_key_binding_setting)
-        self.ui.del_key_btn.clicked.connect(self.del_key)
-        self.ui.set_default_btn.clicked.connect(self.key_binding_provider.set_setting_default)
-        self.ui.caption_btn.clicked.connect(self.open_caption_window)
-
-        self.ui.arg_save_btn.clicked.connect(
-            lambda: self.save_arg(self.ui.arg_comboBox.currentText(), self.get_arg()))
-        self.ui.arg_comboBox.currentIndexChanged.connect(lambda: self.arg_provider.change_current_file(
-            self.ui.arg_comboBox.currentIndex()))
-        self.ui.arg_add_btn.clicked.connect(self.arg_provider.create_json)
-        self.ui.arg_del_btn.clicked.connect(self.arg_provider.del_json)
-        self.ui.arg_test_btn.clicked.connect(self.video_start)
+        self.shadow = QtWidgets.QGraphicsDropShadowEffect(self)
+        self.shadow.setOffset(0, 0)
+        self.shadow.setBlurRadius(12)
+        self.shadow.setColor(PyQt5.QtGui.QColor(128, 128, 255))
+        self.ui.main_body.setGraphicsEffect(self.shadow)
 
     def save_arg(self, new_file_name, new_arg_settings):
+        """
+        Update the argument's setting in file and cam_thread
+        :param new_file_name: str
+        :param new_arg_settings: dict
+        :return: None
+        """
         self.arg_provider.update_arg_file(new_file_name, new_arg_settings)
         self.cam_thread.update_arg_settings(new_arg_settings)
 
     def apply_profile(self):
+        """
+        Update the UI and the key binding settings in cam_thread
+        :return: None
+        """
         self.key_binding_provider.start()
         self.cam_thread.update_key_binding(self.key_binding_provider.settings)
 
     def get_arg(self):
+        """
+        Get the value from the UI
+        :return: dict
+        """
         return {
             'model_complexity': self.ui.model_complex_checkBox.isChecked(),
             'min_detection_confidence': self.ui.detection_spinBox.value(),
@@ -101,6 +84,11 @@ class MainController(QtWidgets.QMainWindow):
         }
 
     def set_arg(self, settings):
+        """
+        Set up the UI with the settings
+        :param settings: dict
+        :return: None
+        """
         self.ui.smooth_spinBox.setValue(settings['smooth'])
         self.ui.min_cutoff_SpinBox.setValue(settings['min_cutoff'])
         self.ui.rate_spinBox.setValue(settings['rate'])
@@ -109,18 +97,37 @@ class MainController(QtWidgets.QMainWindow):
         self.ui.tracking_spinBox.setValue(settings['min_tracking_confidence'])
 
     def set_arg_comboBox(self, index, file_name):
+        """
+        Add the filename in the index of the argument comboBox
+        :param index:int
+        :param file_name:str
+        :return:
+        """
         self.ui.arg_comboBox.insertItem(index, file_name)
 
     def set_selected_arg(self, index):
+        """
+        Set the selected file in comboBox
+        :param index:
+        :return:
+        """
         self.ui.arg_comboBox.setCurrentIndex(index)
 
     def del_key(self):
+        """
+        Set the key as default in the selected item in the key binding table
+        :return:
+        """
         if self.ui.key_binding_table.currentColumn() == 1 or self.ui.key_binding_table.currentColumn() == 2:
             self.ui.key_binding_table.currentItem().setText('未設置')
         else:
             self.ui.key_binding_table.setCurrentItem(None)
 
     def save_key_binding_setting(self):
+        """
+        Save the key binding
+        :return: None
+        """
         new_settings = dict()
         new_settings['Description'] = self.key_binding_provider.settings['Description']
         for row in range(self.ui.key_binding_table.rowCount()):
@@ -133,15 +140,32 @@ class MainController(QtWidgets.QMainWindow):
         self.key_binding_provider.update_settings(new_settings)
 
     def set_profile_list(self, file_name):
+        """
+        Add the filename in the profile list
+        :param file_name: str
+        :return: None
+        """
         self.ui.profile_list.addItem(file_name)
 
     def set_profile_list_selected_item(self, index, file_name):
+        """
+        Set up the selected filename in UI
+        :param index: int
+        :param file_name: str
+        :return: None
+        """
         self.ui.profile_list.setCurrentRow(index)
         self.ui.selected_profile.setText(file_name)
         self.ui.profile_seleted.setText(file_name)
         self.cam_thread.update_key_binding(self.key_binding_provider.settings)
 
     def set_key_binding_table_row(self, row, value):
+        """
+        Set up key binding in the table
+        :param row: int
+        :param value: int
+        :return: None
+        """
         if row == self.ui.key_binding_table.rowCount():
             self.ui.key_binding_table.setRowCount(self.ui.key_binding_table.rowCount() + 1)
         for i in range(3):
@@ -150,16 +174,21 @@ class MainController(QtWidgets.QMainWindow):
             self.ui.key_binding_table.setItem(row, i, new_item)
 
     def set_profile_list_set_description(self, profile_name, description):
+        """
+        Set up the filename and it's description in UI
+        :param profile_name:
+        :param description:
+        :return:
+        """
         self.ui.profile_name.setPlainText(profile_name)
         self.ui.profile_description_context.setPlainText(description)
 
     def side_menu_animation(self, event):
         """
-        the animation of the side_menu_animation
+        The animation of the side_menu_animation
         :param event:the event is triggered by the mouse
-        :return:
+        :return:None
         """
-        # the size of the buttons
         max_size = 150
         min_size = 50
         self.animation1 = QtCore.QPropertyAnimation(self.ui.side_menu, b"maximumWidth")
@@ -182,17 +211,98 @@ class MainController(QtWidgets.QMainWindow):
         time.sleep(0.2)
 
     def open_caption_window(self):
+        """
+        Open the caption window
+        :return: None
+        """
         ui = CaptionWindowUI()
         ui.setupUi(self.caption_window)
         self.caption_window.show()
 
     def video_start(self):
+        """
+        Update the argument settings in video thread and play the video, show how the mediapipe works in these settings
+        :return: None
+        """
         args = self.get_arg()
         self.video_thread.update_arg_settings(args)
         self.video_thread.start()
 
     def video_display(self, scene):
+        """
+        Update the frame in the graphicsView
+        :param scene: QGraphicsScene
+        :return: None
+        """
         self.ui.video_graphicsView.setScene(scene)
 
     def cam_display(self, scene):
+        """
+        Update the frame in the graphicsView
+        :param scene: QGraphicsScene
+        :return: None
+        """
         self.ui.cam_graphicsView.setScene(scene)
+
+    def argument_provider_connect_init(self):
+        self.arg_provider.trigger_load_arg_list.connect(self.set_arg_comboBox)
+        self.arg_provider.trigger_selected.connect(self.set_selected_arg)
+        self.arg_provider.trigger_clear_list.connect(self.ui.arg_comboBox.clear)
+        self.arg_provider.trigger_load_arg.connect(self.set_arg)
+        self.arg_provider.start()
+
+    def key_binding_provider_connect_init(self):
+        self.key_binding_provider.trigger_load_profile_list.connect(self.set_profile_list)
+        self.key_binding_provider.trigger_selected.connect(self.set_profile_list_selected_item)
+        self.key_binding_provider.trigger_info.connect(self.set_profile_list_set_description)
+        self.key_binding_provider.trigger_clear_profile_list.connect(lambda: self.ui.profile_list.clear())
+        self.key_binding_provider.trigger_update_key_binding.connect(self.set_key_binding_table_row)
+        self.key_binding_provider.trigger_clear_key_table.connect(lambda: self.ui.key_binding_table.clearContents())
+        self.key_binding_provider.start()
+
+    def video_thread_connect_init(self):
+        self.video_thread.trigger_display.connect(self.video_display)
+
+    def cam_thread_connect_init(self):
+        self.cam_thread.trigger_display.connect(self.cam_display)
+        self.cam_thread.trigger_show_left_hand.connect(self.ui.left_hand_result_label.setText)
+        self.cam_thread.trigger_show_right_hand.connect(self.ui.right_hand_result_label.setText)
+        self.cam_thread.trigger_show_func.connect(self.ui.func_result_label.setText)
+
+    def side_menu_connect_init(self):
+        self.ui.side_menu.enterEvent = self.side_menu_animation
+        self.ui.side_menu.leaveEvent = self.side_menu_animation
+        self.ui.home_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(0))
+        self.ui.profile_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(1))
+        self.ui.key_binding_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(2))
+        self.ui.argument_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(3))
+
+    def home_page_init(self):
+        self.ui.power_btn.clicked.connect(self.cam_thread.switching_state)
+
+    def profile_page_connect_init(self):
+        self.ui.profile_list.clicked.connect(
+            lambda: self.key_binding_provider.change_current_file(self.ui.profile_list.currentRow()))
+        self.ui.profile_save_btn.clicked.connect(
+            lambda: self.key_binding_provider.save_json(self.ui.profile_name.toPlainText(),
+                                                        self.ui.profile_description_context
+                                                        .toPlainText()))
+        self.ui.profile_apply_btn.clicked.connect(self.apply_profile)
+        self.ui.profile_list_add_btn.clicked.connect(self.key_binding_provider.create_json)
+        self.ui.profile_list_del_btn.clicked.connect(self.key_binding_provider.del_json)
+        self.ui.profile_list_copy_btn.clicked.connect(self.key_binding_provider.copy_json)
+
+    def key_binding_page_connect_init(self):
+        self.ui.key_save_btn.clicked.connect(self.save_key_binding_setting)
+        self.ui.del_key_btn.clicked.connect(self.del_key)
+        self.ui.set_default_btn.clicked.connect(self.key_binding_provider.set_setting_default)
+        self.ui.caption_btn.clicked.connect(self.open_caption_window)
+
+    def argument_page_connect_init(self):
+        self.ui.arg_save_btn.clicked.connect(
+            lambda: self.save_arg(self.ui.arg_comboBox.currentText(), self.get_arg()))
+        self.ui.arg_comboBox.currentIndexChanged.connect(lambda: self.arg_provider.change_current_file(
+            self.ui.arg_comboBox.currentIndex()))
+        self.ui.arg_add_btn.clicked.connect(self.arg_provider.create_json)
+        self.ui.arg_del_btn.clicked.connect(self.arg_provider.del_json)
+        self.ui.arg_test_btn.clicked.connect(self.video_start)

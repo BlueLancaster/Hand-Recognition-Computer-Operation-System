@@ -9,7 +9,6 @@ class SingleHandClassifier(object):
         num_threads=1,
     ):
         self.interpreter = tf.lite.Interpreter(model_path=model_path)
-
         self.interpreter.allocate_tensors()
         self.input_details = self.interpreter.get_input_details()
         self.output_details = self.interpreter.get_output_details()
@@ -28,7 +27,7 @@ class SingleHandClassifier(object):
 
         result = self.interpreter.get_tensor(output_details_tensor_index)
 
-        # print(tf.nn.softmax(result))
+        print(np.max(tf.nn.softmax(result).numpy()))
 
         result_index = np.argmax(np.squeeze(result))
 

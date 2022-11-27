@@ -8,6 +8,9 @@ A class for managing json saving the dict which is about key binding or environm
 
 
 class SettingsProvider(QThread):
+    """
+    An abstract class for I/O file provider
+    """
     def run(self):
         pass
 
@@ -17,22 +20,18 @@ class SettingsProvider(QThread):
 
     def read_json(self):
         """
-        Read dict in the json
+        Read dict in the json file
         :return: None
         """
         with open(self._file_path + self._file_name + '.json') as f:
             self._settings = json.load(f)
 
     def create_json(self):
-        """
-        Create the json with default settings
-        :return: None
-        """
         pass
 
     def save_json(self):
         """
-        If object would be deconstructed,the setting must be saved in json
+        Save the settings in the current json file
         :parameter: new_file_name:str
         :return: None
         """
@@ -41,6 +40,10 @@ class SettingsProvider(QThread):
         self.start()
 
     def del_json(self):
+        """
+        Del the json file
+        :return: None
+        """
         os.remove(self._file_path + self._file_name + '.json')
         try:
             if self._file_name != self._file_list[0]:
@@ -61,14 +64,14 @@ class SettingsProvider(QThread):
 
     def read_file_list(self):
         """
-        get all filenames under the path
+        Get all filenames under the path
         :return:None
         """
         self._file_list = [os.path.splitext(filename)[0] for filename in os.listdir(self._file_path)]
 
     def __init__(self, file_path):
         """
-        Create the filename corresponding to the parameter called provider_type
+        Create the file under the file path
         :parameter file_path:str
         """
         super(SettingsProvider, self).__init__()
@@ -80,6 +83,9 @@ class SettingsProvider(QThread):
 
 
 class KeyBindingProvider(SettingsProvider):
+    """
+    A provider and manager for key binding file
+    """
     trigger_clear_profile_list = pyqtSignal(int)
     trigger_load_profile_list = pyqtSignal(str)
     trigger_selected = pyqtSignal(int, str)
@@ -107,7 +113,7 @@ class KeyBindingProvider(SettingsProvider):
     def __get_converted_settings(self):
         """
         The key type convertor between str used in file and tuple used in program
-        because tuple is not supported in json.This would modify self.settings by popping and insert
+        because tuple is not supported in json.This would modify the settings by popping and insert
         :return: None
         """
         settings = dict()
@@ -130,7 +136,7 @@ class KeyBindingProvider(SettingsProvider):
 
     def change_current_file(self, index):
         """
-        change the current profile
+        Change the current profile
         :param index: int
         :return: None
         """
@@ -163,6 +169,12 @@ class KeyBindingProvider(SettingsProvider):
         self._settings = self.__get_converted_settings()
 
     def save_json(self, new_file_name=None, new_description=None):
+        """
+        Save the key binding settings and the description,modify the current filename
+        :param new_file_name: str
+        :param new_description: str
+        :return:
+        """
         if new_description is not None:
             self._settings['Description'] = new_description
         with open(self._file_path + self._file_name + '.json', "w") as f:
@@ -173,6 +185,10 @@ class KeyBindingProvider(SettingsProvider):
         self.start()
 
     def copy_json(self):
+        """
+        Create a copy of the current file
+        :return:
+        """
         file_name = self._file_name
         temp = 1
         while file_name + ' [copy] ' + str(temp) in self._file_list:
@@ -183,12 +199,17 @@ class KeyBindingProvider(SettingsProvider):
         self.start()
 
     def set_setting_default(self):
+        """
+        Set the key binding settings as default and Update the UI
+        :return:None
+        """
         self.__set_default()
         self.start()
 
     def __set_default(self):
         """
-        Get the default settings corresponding to self.__settings_type
+        Set the key binding settings as default
+        :return: None
         """
         self._settings = {
             'Description': 'This is just a default settings profile',
@@ -215,9 +236,6 @@ class KeyBindingProvider(SettingsProvider):
         }
 
     def __init__(self):
-        """
-        Create the filename corresponding to the parameter called provider_type
-        """
         super(KeyBindingProvider, self).__init__('profiles/')
         try:
             self._file_name = self._file_list[0]
@@ -228,6 +246,9 @@ class KeyBindingProvider(SettingsProvider):
 
 
 class ArgumentProvider(SettingsProvider):
+    """
+    A provider and manager for argument file
+    """
     trigger_load_arg_list = pyqtSignal(int, str)
     trigger_update_arg = pyqtSignal(dict)
     trigger_selected = pyqtSignal(int)
@@ -235,6 +256,10 @@ class ArgumentProvider(SettingsProvider):
     trigger_load_arg = pyqtSignal(dict)
 
     def run(self):
+        """
+        Update the UI
+        :return: None
+        """
         self.read_file_list()
         self.trigger_clear_list.emit(1)
         for index, file_name in enumerate(self._file_list):
@@ -244,12 +269,16 @@ class ArgumentProvider(SettingsProvider):
         self.trigger_load_arg.emit(self._settings)
 
     def set_setting_default(self):
-        self.__set_default()
+        """
+        Set the arguments as default and Update the UI
+        :return:
+        """
+        self.__get_default_argument()
         self.start()
 
-    def __set_default(self):
+    def __get_default_argument(self):
         """
-        Set the settings default
+        Set the arguments as default
         """
         self._settings = {
             'model_complexity': True,
@@ -261,6 +290,12 @@ class ArgumentProvider(SettingsProvider):
         }
 
     def update_arg_file(self, new_file_name,  new_settings):
+        """
+        Update the argument file
+        :param new_file_name: str
+        :param new_settings: str
+        :return: None
+        """
         if self._file_name != new_file_name:
             os.rename(self._file_path + self._file_name + '.json', self._file_path + new_file_name + '.json')
             self._file_name = new_file_name
@@ -268,6 +303,11 @@ class ArgumentProvider(SettingsProvider):
         self.save_json()
 
     def change_current_file(self, index):
+        """
+        Change the current file
+        :param index: int
+        :return: None
+        """
         if index != -1:
             self._file_name = self._file_list[index]
             self.read_json()
@@ -278,7 +318,7 @@ class ArgumentProvider(SettingsProvider):
         Create the json with default settings
         :return: None
         """
-        self.__set_default()
+        self.__get_default_argument()
         self._file_name = 'new argument settings'
         temp = 1
         while self._file_name + str(temp) in self._file_list:
