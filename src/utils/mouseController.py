@@ -85,8 +85,8 @@ def mouse(landmark_eight_x, landmark_eight_y):
     temp[1] = temp[1]/smoothen
 
     for i in range(smoothen):
-        pastLocalation_x = pastLocalation_x + temp[0]
-        pastLocalation_y = pastLocalation_y + temp[1]
+        pastLocalation_x = pastLocalation_x + temp[0]/2
+        pastLocalation_y = pastLocalation_y + temp[1]/2
         pos = (int(pastLocalation_x), int(pastLocalation_y))
         win32api.SetCursorPos(pos)
 
@@ -104,7 +104,8 @@ def left_up():
     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
 
 
-def left_click():
+def left_double_click():
+    pyautogui.click(button='left')
     pyautogui.click(button='left')
     return
 

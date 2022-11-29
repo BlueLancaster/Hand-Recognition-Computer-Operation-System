@@ -1,21 +1,22 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/warning.png</file>
     <file>icons/play.png</file>
     <file>icons/try.png</file>
     <file>icons/profile_switch.png</file>
     <file>icons/book.png</file>
     <file>icons/setting.png</file>
-    <file>icons/check.png</file>
     <file>icons/computer-mouse.png</file>
-    <file>icons/copy.png</file>
+    <file>icons/check.png</file>
     <file>icons/default.png</file>
+    <file>icons/copy.png</file>
     <file>icons/home.png</file>
     <file>icons/left.png</file>
     <file>icons/menu.png</file>
-    <file>icons/minus.png</file>
     <file>icons/mouse.png</file>
+    <file>icons/minus.png</file>
     <file>icons/plus.png</file>
-    <file>icons/stop-sign.png</file>
+    <file>icons/stop.png</file>
     <file>icons/zoom-in.png</file>
     <file>icons/user.png</file>
   </qresource>

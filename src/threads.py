@@ -82,6 +82,7 @@ class VideoThread(QThread):
 
 
 class CamThread(QThread):
+    trigger_warning = pyqtSignal(int)
     trigger_display = pyqtSignal(QGraphicsScene)
     trigger_show_func = pyqtSignal(str)
     trigger_show_left_hand = pyqtSignal(str)
@@ -114,6 +115,8 @@ class CamThread(QThread):
         self.use_rect = True
 
         # <--- single hand gesture history --->
+        self.last_function_mode = -1
+        self.most_common_fg_id = 0
         self.landmark_eight_history = deque(maxlen=16)
         self.dynamic_gesture_history = deque(maxlen=16)
         self.last_execution_time = 0
@@ -129,14 +132,16 @@ class CamThread(QThread):
         self.pre_processed_double_hands_history_list = []
         self.landmark_eight_left = [0, 0]
         self.landmark_eight_right = [0, 0]
+        self.landmark_eight = None
+        self.pre_processed_point_history_list = None
 
         # <---model setting--->
         self.single_hand_classifier = SingleHandClassifier()
-        self.point_history_classifier = LandmarkEightHistoryClassifier()
+        self.landmark_eight_history_classifier = LandmarkEightHistoryClassifier()
         self.double_hands_classifier = DoubleHandsClassifier()
         self.single_hand_classifier_labels = read_labels(
             'model/single_hand_classifier/single_hand_classifier_label.csv')
-        self.point_history_classifier_labels = read_labels(
+        self.landmark_eight_history_classifier_labels = read_labels(
             'model/landmark_eight_history_classifier/landmark_eight_history_classifier_label.csv')
         self.double_hands_classifier_labels = read_labels(
             'model/double_hands_classifier/double_hands_classifier_label.csv')
@@ -147,6 +152,8 @@ class CamThread(QThread):
 
     def run(self):
         print('run start')
+        if not self.__cam.isOpened():
+            self.trigger_warning.emit(1)
         sub_process = multiprocessing.Process(target=screenshot1)
         while self.__cam.isOpened() and self.switch_state:
             fps = self.fps_cal.get()
@@ -177,13 +184,16 @@ class CamThread(QThread):
                             landmarks.x = pre_joints[i][0]
                             landmarks.y = pre_joints[i][1]
                             landmarks.z = pre_joints[i][2]
+
                     # Bounding box calculation
                     rect = calc_bounding_rect(debug_frame, hand_landmarks)
                     # Landmark calculation
                     landmark_list = calc_landmark_list(debug_frame, hand_landmarks)
+                    self.landmark_eight = landmark_list[8]
                     # Conversion to relative coordinates / normalized coordinates
                     pre_processed_landmark_list = pre_process_landmark(landmark_list)
-                    pre_processed_point_history_list = pre_process_point_history(
+
+                    self.pre_processed_point_history_list = pre_process_point_history(
                         debug_frame, self.landmark_eight_history)
                     # Hand sign classification
                     hand_sign_id = self.single_hand_classifier(pre_processed_landmark_list)
@@ -239,8 +249,8 @@ class CamThread(QThread):
                 # do  something corresponding to function code
                 if function_mode == 0:  # Point gesture
                     left_up()
-                    mouse(results.multi_hand_landmarks[0].landmark[6].x,
-                          results.multi_hand_landmarks[0].landmark[6].y)
+                    mouse(results.multi_hand_landmarks[0].landmark[8].x,
+                          results.multi_hand_landmarks[0].landmark[8].y)
 
                 elif function_mode == 17:  # two hand dynamic
                     self.double_hands_history.append(self.landmark_eight_left)
@@ -281,21 +291,33 @@ class CamThread(QThread):
                     elif function_mode == 13:
                         scroll_down()
                     elif function_mode == 15:
-                        self.previous_pos = mouse_moving(results, self.previous_pos)
+                        mouse(results.multi_hand_landmarks[0].landmark[8].x,
+                              results.multi_hand_landmarks[0].landmark[8].y)
                         if self.key_binding.get(tuple(self.last_two_handID)) != 15:
                             left_down()
                     elif function_mode == 16:
                         right_click()
+                    elif function_mode == 18:
+                        self.landmark_eight.pop()
+                        self.landmark_eight_history.append(self.landmark_eight)
+                        finger_gesture_id = self.landmark_eight_history_classifier(
+                                self.pre_processed_point_history_list)
+                        self.dynamic_gesture_history.append(finger_gesture_id)
+                        self.most_common_fg_id = Counter(self.dynamic_gesture_history).most_common()[0][0]
+
+                    if self.last_function_mode == 18 and function_mode != 18:
+                        print(self.most_common_fg_id)
+                    self.last_function_mode = function_mode
                     self.last_execution_time = time.time()
                     self.past_distance = distance
                     self.last_two_handID = two_handID
 
             else:
-                self.dynamic_gesture_history.append([0, 0])
+                self.landmark_eight_history.append([0, 0])
                 self.double_hands_history.append([0, 0])
                 self.double_hands_history.append([0, 0])
             # debug_frame = draw_moving_range(debug_frame, get_moving_range())
-            debug_frame = draw_point_history(debug_frame, self.dynamic_gesture_history)
+            debug_frame = draw_point_history(debug_frame, self.landmark_eight_history)
             debug_frame = draw_info(debug_frame, fps, 0, 0)
 
             # update UI graphic_view
@@ -324,38 +346,40 @@ class CamThread(QThread):
     @staticmethod
     def function_label(code):
         if code == 0:
-            return "操作滑鼠模式"
+            return '操作滑鼠模式'
         elif code == 1:
-            return "截圖文字辨識"
+            return '截圖文字辨識'
         elif code == 2:
-            return "文字翻譯"
+            return '文字翻譯'
         elif code == 3:
-            return "放大縮小"
+            return '放大縮小'
         elif code == 4:
-            return "全螢幕"
+            return '全螢幕'
         elif code == 5:
-            return "返回桌面"
+            return '返回桌面'
         elif code == 6:
-            return "下一頁"
+            return '下一頁'
         elif code == 7:
-            return "上一頁"
+            return '上一頁'
         elif code == 8:
-            return "PPT 雷射筆"
+            return 'PPT 雷射筆'
         elif code == 9:
-            return "複製"
+            return '複製'
         elif code == 10:
-            return "貼上"
+            return '貼上'
         elif code == 11:
-            return "順時針旋轉90度"
+            return '順時針旋轉90度'
         elif code == 12:
-            return "向上滑"
+            return '向上滑'
         elif code == 13:
-            return "向下滑"
+            return '向下滑'
         elif code == 14:
-            return "螢幕截圖"
+            return '螢幕截圖'
         elif code == 15:
-            return "滑鼠左鍵單點"
+            return '滑鼠左鍵單點'
         elif code == 16:
-            return "滑鼠右鍵單點"
+            return '滑鼠右鍵單點'
         elif code == 17:
-            return "進入雙手動態模式"
+            return '進入雙手動態模式'
+        elif code == 18:
+            return '進入單手動態模式'

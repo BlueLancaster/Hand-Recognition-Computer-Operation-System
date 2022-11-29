@@ -379,7 +379,9 @@ background-color: rgb(0, 217, 255, 255);
 QGroupBox{
 background-color: rgb(255, 255, 255);
 border: 2px solid gray
-}</string>
+}
+
+</string>
       </property>
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
@@ -387,7 +389,10 @@ border: 2px solid gray
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <layout class="QGridLayout" name="gridLayout">
+      <layout class="QHBoxLayout" name="horizontalLayout_12">
+       <property name="spacing">
+        <number>0</number>
+       </property>
        <property name="leftMargin">
         <number>0</number>
        </property>
@@ -400,10 +405,7 @@ border: 2px solid gray
        <property name="bottomMargin">
         <number>0</number>
        </property>
-       <property name="spacing">
-        <number>0</number>
-       </property>
-       <item row="0" column="0">
+       <item>
         <widget class="QStackedWidget" name="stackedWidget">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -412,8 +414,7 @@ border: 2px solid gray
           </sizepolicy>
          </property>
          <property name="styleSheet">
-          <string notr="true">
-</string>
+          <string notr="true"/>
          </property>
          <property name="currentIndex">
           <number>0</number>
@@ -587,8 +588,7 @@ border: 2px solid black</string>
                        </sizepolicy>
                       </property>
                       <property name="styleSheet">
-                       <string notr="true">background:transparent;
-background-color: rgb(94, 252, 141);
+                       <string notr="true">background-color: rgb(94, 252, 141);
 border-radius:25px</string>
                       </property>
                       <property name="text">
@@ -829,7 +829,6 @@ background-color: rgb(255, 255, 255);
 }
 QToolButton{
 background:transparent;
-background-color: rgb(94, 252, 141);
 }</string>
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -956,7 +955,7 @@ border: 2px solid gray;</string>
                  <item>
                   <widget class="QToolButton" name="profile_list_add_btn">
                    <property name="styleSheet">
-                    <string notr="true"/>
+                    <string notr="true">background-color: rgb(94, 252, 141);</string>
                    </property>
                    <property name="text">
                     <string/>
@@ -976,7 +975,7 @@ border: 2px solid gray;</string>
                  <item>
                   <widget class="QToolButton" name="profile_list_del_btn">
                    <property name="styleSheet">
-                    <string notr="true"/>
+                    <string notr="true">background-color:rgb(255, 85, 0)</string>
                    </property>
                    <property name="text">
                     <string>...</string>
@@ -996,7 +995,8 @@ border: 2px solid gray;</string>
                  <item>
                   <widget class="QToolButton" name="profile_list_copy_btn">
                    <property name="styleSheet">
-                    <string notr="true"/>
+                    <string notr="true">background-color: rgb(85, 0, 255);
+</string>
                    </property>
                    <property name="text">
                     <string>...</string>
@@ -1131,7 +1131,7 @@ border: 2px solid gray;</string>
                     </font>
                    </property>
                    <property name="styleSheet">
-                    <string notr="true"/>
+                    <string notr="true">background-color: rgb(255, 255, 0);</string>
                    </property>
                    <property name="text">
                     <string>套用</string>
@@ -1160,7 +1160,7 @@ border: 2px solid gray;</string>
                     </font>
                    </property>
                    <property name="styleSheet">
-                    <string notr="true"/>
+                    <string notr="true">background-color: rgb(94, 252, 141);</string>
                    </property>
                    <property name="text">
                     <string>儲存</string>
@@ -1417,7 +1417,7 @@ background-color: rgb(255, 255, 255);
               <enum>QFrame::Raised</enum>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_19">
-              <item>
+              <item alignment="Qt::AlignLeft">
                <widget class="QGroupBox" name="selected_profile_area">
                 <property name="minimumSize">
                  <size>
@@ -1485,6 +1485,9 @@ background-color: rgb(255, 255, 255);
                    <property name="font">
                     <font>
                      <family>Adobe 黑体 Std R</family>
+                     <pointsize>14</pointsize>
+                     <weight>75</weight>
+                     <bold>true</bold>
                     </font>
                    </property>
                    <property name="text">
@@ -1895,6 +1898,8 @@ background-color: rgb(255, 255, 255);
                        <font>
                         <family>Adobe 黑体 Std R</family>
                         <pointsize>10</pointsize>
+                        <weight>50</weight>
+                        <bold>false</bold>
                        </font>
                       </property>
                       <property name="styleSheet">
@@ -1939,6 +1944,9 @@ background-color: rgb(255, 255, 255);
                            <pointsize>14</pointsize>
                           </font>
                          </property>
+                         <property name="styleSheet">
+                          <string notr="true">background-color: rgb(255, 255, 0);</string>
+                         </property>
                          <property name="text">
                           <string>測試</string>
                          </property>
@@ -1964,6 +1972,9 @@ background-color: rgb(255, 255, 255);
                            <family>Adobe 黑体 Std R</family>
                            <pointsize>14</pointsize>
                           </font>
+                         </property>
+                         <property name="styleSheet">
+                          <string notr="true">background-color: rgb(255, 85, 0);</string>
                          </property>
                          <property name="text">
                           <string>刪除</string>
@@ -1991,6 +2002,9 @@ background-color: rgb(255, 255, 255);
                            <pointsize>14</pointsize>
                           </font>
                          </property>
+                         <property name="styleSheet">
+                          <string notr="true">background-color: rgb(94, 252, 141);</string>
+                         </property>
                          <property name="text">
                           <string>儲存</string>
                          </property>
@@ -2016,6 +2030,9 @@ background-color: rgb(255, 255, 255);
                            <family>Adobe 黑体 Std R</family>
                            <pointsize>14</pointsize>
                           </font>
+                         </property>
+                         <property name="styleSheet">
+                          <string notr="true">background-color:rgb(85, 170, 127)</string>
                          </property>
                          <property name="text">
                           <string>新增</string>
@@ -2083,6 +2100,17 @@ border: 2px solid black</string>
                   <family>Adobe 黑体 Std R</family>
                   <pointsize>14</pointsize>
                  </font>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">QGroupBox{
+background-color: rgb(85, 255, 255);
+}
+#model_arg_area{
+background-color: rgb(255, 255, 255);
+}
+QLabel{
+background-color: rgb(85, 255, 255);
+}</string>
                 </property>
                 <property name="title">
                  <string>模型係數</string>
@@ -2288,6 +2316,17 @@ border: 2px solid black</string>
                <weight>50</weight>
                <bold>false</bold>
               </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">QGroupBox{
+background-color: rgb(85, 255, 255);
+}
+#filter_arg_area{
+background-color: rgb(255, 255, 255);
+}
+QLabel{
+background-color: rgb(85, 255, 255);
+}</string>
              </property>
              <property name="title">
               <string>濾波器係數</string>

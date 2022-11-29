@@ -1,8 +1,8 @@
 import time
 
 import PyQt5
-from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtGui import QPixmap
+from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5.QtGui import QPixmap, QCursor
 from PyQt5.QtWidgets import QTableWidgetItem
 
 from UI.main_window import Ui_MainWindow as MainWindowUI
@@ -19,9 +19,10 @@ class MainController(QtWidgets.QMainWindow):
         self.ui.setupUi(self)  # Initialize  ui and QtWidgets
         self.animation1 = None
         self.animation2 = None
+        self.powerBtn_state = False
+        self.profile_info_state = True
         # Initialize main_window
-        self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
-        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
         self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
         self.ui.stackedWidget.setCurrentIndex(0)
         # Initialize each provider and each thread
@@ -45,11 +46,49 @@ class MainController(QtWidgets.QMainWindow):
         self.argument_page_connect_init()
         self.caption_window = QtWidgets.QMainWindow()
 
-        self.shadow = QtWidgets.QGraphicsDropShadowEffect(self)
-        self.shadow.setOffset(0, 0)
-        self.shadow.setBlurRadius(12)
-        self.shadow.setColor(PyQt5.QtGui.QColor(128, 128, 255))
-        self.ui.main_body.setGraphicsEffect(self.shadow)
+        # for moving the main window
+        self.moveFlag = False
+        self.movePosition = None
+
+    def mousePressEvent(self, event):
+        """
+        Override the event for moving the window
+        :param event:QMouseEvent
+        :return: None
+        """
+        if event.button() == QtCore.Qt.LeftButton:
+            self.moveFlag = True
+            self.movePosition = event.globalPos() - self.pos()
+            event.accept()
+
+    def mouseMoveEvent(self, event):
+        """
+        Override the event for moving the window
+        :param event:QMouseEvent
+        :return: None
+        """
+        if QtCore.Qt.LeftButton and self.moveFlag:
+            self.move(event.globalPos() - self.movePosition)
+            event.accept()
+
+    def mouseReleaseEvent(self, event):
+        """
+        Override the event for moving the window
+        :param event:QMouseEvent
+        :return: None
+        """
+        self.moveFlag = False
+
+    def keyPressEvent(self, event):
+        """
+        Override the event for closing the window
+        :param event:QMouseEvent
+        :return: None
+        """
+        if event.key() == QtCore.Qt.Key_Escape:
+            self.close()
+        elif event.key() == QtCore.Qt.Key_F1:
+            self.showMinimized()
 
     def save_arg(self, new_file_name, new_arg_settings):
         """
@@ -147,6 +186,14 @@ class MainController(QtWidgets.QMainWindow):
         """
         self.ui.profile_list.addItem(file_name)
 
+    def profile_info_state_unsaved(self):
+        self.ui.profile_info_state.setText('尚未儲存')
+        self.ui.profile_info_state_box.setStyleSheet('background-color:rgb(255, 85, 0)')
+
+    def profile_info_state_saved(self):
+        self.ui.profile_info_state.setText('已儲存')
+        self.ui.profile_info_state_box.setStyleSheet('')
+
     def set_profile_list_selected_item(self, index, file_name):
         """
         Set up the selected filename in UI
@@ -210,6 +257,20 @@ class MainController(QtWidgets.QMainWindow):
         self.animation2.start()
         time.sleep(0.2)
 
+    def powerBtn_state_changed(self):
+        if not self.powerBtn_state:
+            self.ui.power_btn.setStyleSheet('background-color: rgb(250, 185, 65);'
+                                            'border-radius:25px')
+            icon_name = 'stop'
+        else:
+            self.ui.power_btn.setStyleSheet('background-color: rgb(94, 252, 141);'
+                                            'border-radius:25px')
+            icon_name = 'play'
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(':/icons/icons/' + icon_name + '.png'), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.ui.power_btn.setIcon(icon)
+        self.powerBtn_state = not self.powerBtn_state
+
     def open_caption_window(self):
         """
         Open the caption window
@@ -244,6 +305,14 @@ class MainController(QtWidgets.QMainWindow):
         """
         self.ui.cam_graphicsView.setScene(scene)
 
+    def cam_not_working(self):
+        self.ui.power_btn.setStyleSheet('background-color: rgb(230, 0, 0);'
+                                        'border-radius:25px')
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(':/icons/icons/' + 'warning' + '.png'), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.ui.power_btn.setIcon(icon)
+        self.ui.power_btn.setEnabled(False)
+
     def argument_provider_connect_init(self):
         self.arg_provider.trigger_load_arg_list.connect(self.set_arg_comboBox)
         self.arg_provider.trigger_selected.connect(self.set_selected_arg)
@@ -258,12 +327,14 @@ class MainController(QtWidgets.QMainWindow):
         self.key_binding_provider.trigger_clear_profile_list.connect(lambda: self.ui.profile_list.clear())
         self.key_binding_provider.trigger_update_key_binding.connect(self.set_key_binding_table_row)
         self.key_binding_provider.trigger_clear_key_table.connect(lambda: self.ui.key_binding_table.clearContents())
+        self.key_binding_provider.trigger_save.connect(self.profile_info_state_saved)
         self.key_binding_provider.start()
 
     def video_thread_connect_init(self):
         self.video_thread.trigger_display.connect(self.video_display)
 
     def cam_thread_connect_init(self):
+        self.cam_thread.trigger_warning.connect(self.cam_not_working)
         self.cam_thread.trigger_display.connect(self.cam_display)
         self.cam_thread.trigger_show_left_hand.connect(self.ui.left_hand_result_label.setText)
         self.cam_thread.trigger_show_right_hand.connect(self.ui.right_hand_result_label.setText)
@@ -279,18 +350,18 @@ class MainController(QtWidgets.QMainWindow):
 
     def home_page_init(self):
         self.ui.power_btn.clicked.connect(self.cam_thread.switching_state)
+        self.ui.power_btn.clicked.connect(self.powerBtn_state_changed)
 
     def profile_page_connect_init(self):
         self.ui.profile_list.clicked.connect(
             lambda: self.key_binding_provider.change_current_file(self.ui.profile_list.currentRow()))
-        self.ui.profile_save_btn.clicked.connect(
-            lambda: self.key_binding_provider.save_json(self.ui.profile_name.toPlainText(),
-                                                        self.ui.profile_description_context
-                                                        .toPlainText()))
+        self.ui.profile_save_btn.clicked.connect(lambda: self.key_binding_provider.save_json(
+            self.ui.profile_name.toPlainText(), self.ui.profile_description_context.toPlainText()))
         self.ui.profile_apply_btn.clicked.connect(self.apply_profile)
         self.ui.profile_list_add_btn.clicked.connect(self.key_binding_provider.create_json)
         self.ui.profile_list_del_btn.clicked.connect(self.key_binding_provider.del_json)
         self.ui.profile_list_copy_btn.clicked.connect(self.key_binding_provider.copy_json)
+        self.ui.profile_description_context.textChanged.connect(self.profile_info_state_unsaved)
 
     def key_binding_page_connect_init(self):
         self.ui.key_save_btn.clicked.connect(self.save_key_binding_setting)

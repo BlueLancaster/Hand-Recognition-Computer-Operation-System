@@ -18,6 +18,7 @@ class Ui_MainWindow(object):
         MainWindow.setMinimumSize(QtCore.QSize(900, 675))
         MainWindow.setStyleSheet("")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
+        self.centralwidget.setStyleSheet("")
         self.centralwidget.setObjectName("centralwidget")
         self.horizontalLayout = QtWidgets.QHBoxLayout(self.centralwidget)
         self.horizontalLayout.setContentsMargins(0, 10, 0, 0)
@@ -179,36 +180,35 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.main_body.sizePolicy().hasHeightForWidth())
         self.main_body.setSizePolicy(sizePolicy)
-        self.main_body.setStyleSheet("main_body{\n"
-"border-top-right-radius:20px;\n"
-"border-bottom-right-radius:20px;\n"
-"}\n"
-"QWidget{\n"
-"background-color: rgb(0, 217, 255, 255)\n"
+        self.main_body.setStyleSheet("QWidget{\n"
+"background-color: rgb(0, 217, 255, 255);\n"
 "}\n"
 "QGroupBox{\n"
 "background-color: rgb(255, 255, 255);\n"
 "border: 2px solid gray\n"
 "}\n"
+"\n"
 "")
         self.main_body.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.main_body.setFrameShadow(QtWidgets.QFrame.Raised)
         self.main_body.setObjectName("main_body")
-        self.gridLayout = QtWidgets.QGridLayout(self.main_body)
-        self.gridLayout.setContentsMargins(0, 0, 0, 0)
-        self.gridLayout.setSpacing(0)
-        self.gridLayout.setObjectName("gridLayout")
+        self.horizontalLayout_12 = QtWidgets.QHBoxLayout(self.main_body)
+        self.horizontalLayout_12.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout_12.setSpacing(0)
+        self.horizontalLayout_12.setObjectName("horizontalLayout_12")
         self.stackedWidget = QtWidgets.QStackedWidget(self.main_body)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.stackedWidget.sizePolicy().hasHeightForWidth())
         self.stackedWidget.setSizePolicy(sizePolicy)
+        self.stackedWidget.setStyleSheet("")
         self.stackedWidget.setObjectName("stackedWidget")
         self.home_page = QtWidgets.QWidget()
         self.home_page.setStyleSheet("QLabel{\n"
 "background-color: rgb(255, 255, 255);\n"
-"}")
+"}\n"
+"")
         self.home_page.setObjectName("home_page")
         self.verticalLayout_18 = QtWidgets.QVBoxLayout(self.home_page)
         self.verticalLayout_18.setContentsMargins(0, 0, 0, 0)
@@ -278,8 +278,7 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.power_btn.sizePolicy().hasHeightForWidth())
         self.power_btn.setSizePolicy(sizePolicy)
-        self.power_btn.setStyleSheet("background:transparent;\n"
-"background-color: rgb(94, 252, 141);\n"
+        self.power_btn.setStyleSheet("background-color: rgb(94, 252, 141);\n"
 "border-radius:25px")
         self.power_btn.setText("")
         icon5 = QtGui.QIcon()
@@ -425,7 +424,6 @@ class Ui_MainWindow(object):
 "}\n"
 "QToolButton{\n"
 "background:transparent;\n"
-"background-color: rgb(94, 252, 141);\n"
 "}")
         self.profile_page.setObjectName("profile_page")
         self.horizontalLayout_4 = QtWidgets.QHBoxLayout(self.profile_page)
@@ -474,7 +472,7 @@ class Ui_MainWindow(object):
         self.profile_list_label.setObjectName("profile_list_label")
         self.horizontalLayout_6.addWidget(self.profile_list_label, 0, QtCore.Qt.AlignLeft)
         self.profile_list_add_btn = QtWidgets.QToolButton(self.list_control_btn)
-        self.profile_list_add_btn.setStyleSheet("")
+        self.profile_list_add_btn.setStyleSheet("background-color: rgb(94, 252, 141);")
         self.profile_list_add_btn.setText("")
         icon6 = QtGui.QIcon()
         icon6.addPixmap(QtGui.QPixmap(":/icons/icons/plus.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -483,7 +481,7 @@ class Ui_MainWindow(object):
         self.profile_list_add_btn.setObjectName("profile_list_add_btn")
         self.horizontalLayout_6.addWidget(self.profile_list_add_btn)
         self.profile_list_del_btn = QtWidgets.QToolButton(self.list_control_btn)
-        self.profile_list_del_btn.setStyleSheet("")
+        self.profile_list_del_btn.setStyleSheet("background-color:rgb(255, 85, 0)")
         icon7 = QtGui.QIcon()
         icon7.addPixmap(QtGui.QPixmap(":/icons/icons/minus.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.profile_list_del_btn.setIcon(icon7)
@@ -491,7 +489,8 @@ class Ui_MainWindow(object):
         self.profile_list_del_btn.setObjectName("profile_list_del_btn")
         self.horizontalLayout_6.addWidget(self.profile_list_del_btn)
         self.profile_list_copy_btn = QtWidgets.QToolButton(self.list_control_btn)
-        self.profile_list_copy_btn.setStyleSheet("")
+        self.profile_list_copy_btn.setStyleSheet("background-color: rgb(85, 0, 255);\n"
+"")
         icon8 = QtGui.QIcon()
         icon8.addPixmap(QtGui.QPixmap(":/icons/icons/copy.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.profile_list_copy_btn.setIcon(icon8)
@@ -549,7 +548,7 @@ class Ui_MainWindow(object):
         font.setFamily("Adobe 黑体 Std R")
         font.setPointSize(14)
         self.profile_apply_btn.setFont(font)
-        self.profile_apply_btn.setStyleSheet("")
+        self.profile_apply_btn.setStyleSheet("background-color: rgb(255, 255, 0);")
         icon9 = QtGui.QIcon()
         icon9.addPixmap(QtGui.QPixmap(":/icons/icons/profile_switch.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.profile_apply_btn.setIcon(icon9)
@@ -562,7 +561,7 @@ class Ui_MainWindow(object):
         font.setFamily("Adobe 黑体 Std R")
         font.setPointSize(14)
         self.profile_save_btn.setFont(font)
-        self.profile_save_btn.setStyleSheet("")
+        self.profile_save_btn.setStyleSheet("background-color: rgb(94, 252, 141);")
         icon10 = QtGui.QIcon()
         icon10.addPixmap(QtGui.QPixmap(":/icons/icons/check.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.profile_save_btn.setIcon(icon10)
@@ -711,11 +710,14 @@ class Ui_MainWindow(object):
         self.selected_profile = QtWidgets.QLabel(self.selected_profile_area)
         font = QtGui.QFont()
         font.setFamily("Adobe 黑体 Std R")
+        font.setPointSize(14)
+        font.setBold(True)
+        font.setWeight(75)
         self.selected_profile.setFont(font)
         self.selected_profile.setText("")
         self.selected_profile.setObjectName("selected_profile")
         self.horizontalLayout_11.addWidget(self.selected_profile)
-        self.verticalLayout_19.addWidget(self.selected_profile_area)
+        self.verticalLayout_19.addWidget(self.selected_profile_area, 0, QtCore.Qt.AlignLeft)
         self.profile_control_btn_area = QtWidgets.QGroupBox(self.profile_control_frame)
         font = QtGui.QFont()
         font.setFamily("Adobe 黑体 Std R")
@@ -903,6 +905,8 @@ class Ui_MainWindow(object):
         font = QtGui.QFont()
         font.setFamily("Adobe 黑体 Std R")
         font.setPointSize(10)
+        font.setBold(False)
+        font.setWeight(50)
         self.arg_comboBox.setFont(font)
         self.arg_comboBox.setStyleSheet("background-color: rgb(255, 255, 255);")
         self.arg_comboBox.setEditable(True)
@@ -921,6 +925,7 @@ class Ui_MainWindow(object):
         font.setFamily("Adobe 黑体 Std R")
         font.setPointSize(14)
         self.arg_test_btn.setFont(font)
+        self.arg_test_btn.setStyleSheet("background-color: rgb(255, 255, 0);")
         icon13 = QtGui.QIcon()
         icon13.addPixmap(QtGui.QPixmap(":/icons/icons/try.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.arg_test_btn.setIcon(icon13)
@@ -933,6 +938,7 @@ class Ui_MainWindow(object):
         font.setFamily("Adobe 黑体 Std R")
         font.setPointSize(14)
         self.arg_del_btn.setFont(font)
+        self.arg_del_btn.setStyleSheet("background-color: rgb(255, 85, 0);")
         self.arg_del_btn.setIcon(icon7)
         self.arg_del_btn.setIconSize(QtCore.QSize(40, 40))
         self.arg_del_btn.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
@@ -943,6 +949,7 @@ class Ui_MainWindow(object):
         font.setFamily("Adobe 黑体 Std R")
         font.setPointSize(14)
         self.arg_save_btn.setFont(font)
+        self.arg_save_btn.setStyleSheet("background-color: rgb(94, 252, 141);")
         self.arg_save_btn.setIcon(icon10)
         self.arg_save_btn.setIconSize(QtCore.QSize(40, 40))
         self.arg_save_btn.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
@@ -953,6 +960,7 @@ class Ui_MainWindow(object):
         font.setFamily("Adobe 黑体 Std R")
         font.setPointSize(14)
         self.arg_add_btn.setFont(font)
+        self.arg_add_btn.setStyleSheet("background-color:rgb(85, 170, 127)")
         self.arg_add_btn.setIcon(icon6)
         self.arg_add_btn.setIconSize(QtCore.QSize(40, 40))
         self.arg_add_btn.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
@@ -980,6 +988,15 @@ class Ui_MainWindow(object):
         font.setFamily("Adobe 黑体 Std R")
         font.setPointSize(14)
         self.model_arg_area.setFont(font)
+        self.model_arg_area.setStyleSheet("QGroupBox{\n"
+"background-color: rgb(85, 255, 255);\n"
+"}\n"
+"#model_arg_area{\n"
+"background-color: rgb(255, 255, 255);\n"
+"}\n"
+"QLabel{\n"
+"background-color: rgb(85, 255, 255);\n"
+"}")
         self.model_arg_area.setObjectName("model_arg_area")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.model_arg_area)
         self.verticalLayout_2.setContentsMargins(-1, 25, -1, -1)
@@ -1090,6 +1107,15 @@ class Ui_MainWindow(object):
         font.setBold(False)
         font.setWeight(50)
         self.filter_arg_area.setFont(font)
+        self.filter_arg_area.setStyleSheet("QGroupBox{\n"
+"background-color: rgb(85, 255, 255);\n"
+"}\n"
+"#filter_arg_area{\n"
+"background-color: rgb(255, 255, 255);\n"
+"}\n"
+"QLabel{\n"
+"background-color: rgb(85, 255, 255);\n"
+"}")
         self.filter_arg_area.setObjectName("filter_arg_area")
         self.horizontalLayout_3 = QtWidgets.QHBoxLayout(self.filter_arg_area)
         self.horizontalLayout_3.setContentsMargins(-1, 25, -1, -1)
@@ -1202,14 +1228,14 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3.addWidget(self.groupBox)
         self.verticalLayout.addWidget(self.filter_arg_area)
         self.stackedWidget.addWidget(self.argument_page)
-        self.gridLayout.addWidget(self.stackedWidget, 0, 0, 1, 1)
+        self.horizontalLayout_12.addWidget(self.stackedWidget)
         self.horizontalLayout.addWidget(self.main_body)
         self.main_body.raise_()
         self.side_menu.raise_()
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
-        self.stackedWidget.setCurrentIndex(3)
+        self.stackedWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):

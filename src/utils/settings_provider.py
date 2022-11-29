@@ -92,6 +92,7 @@ class KeyBindingProvider(SettingsProvider):
     trigger_info = pyqtSignal(str, str)
     trigger_update_key_binding = pyqtSignal(int, tuple)
     trigger_clear_key_table = pyqtSignal(int)
+    trigger_save = pyqtSignal(int)
 
     def run(self):
         """
@@ -109,6 +110,7 @@ class KeyBindingProvider(SettingsProvider):
         for row, key in enumerate(self._settings):
             if key != 'Description':
                 self.trigger_update_key_binding.emit(row - 1, tuple(map(str, (self._settings[key], key[0], key[1]))))
+        self.trigger_save.emit(1)
 
     def __get_converted_settings(self):
         """
@@ -144,6 +146,7 @@ class KeyBindingProvider(SettingsProvider):
             self._file_name = self._file_list[index]
             self.read_json()
             self.trigger_info.emit(self._file_name, self._settings['Description'])
+        self.trigger_save.emit(1)
 
     def create_json(self):
         """
@@ -213,25 +216,25 @@ class KeyBindingProvider(SettingsProvider):
         """
         self._settings = {
             'Description': 'This is just a default settings profile',
-            (-1, 2): 0,
-            (2, -1): 0,
+            (-1, 1): 0,
+            (1, -1): 0,
             (7, 7): 1,
             (-1, 6): 2,
             (6, -1): 2,
-            (-1, 1): 3,
-            (1, -1): 3,
-            (2, 7): 8,
-            (7, 2): 8,
+            (-1, 0): 3,
+            (0, -1): 3,
+            (2, 8): 8,
+            (8, 2): 8,
             (0, 5): 9,
             (5, 0): 9,
             (2, 5): 10,
             (5, 2): 10,
             (1, 7): 12,
             (7, 1): 13,
-            (-1, 3): 15,
-            (3, -1): 15,
-            (-1, 4): 16,
-            (4, -1): 16,
+            (-1, 7): 15,
+            (7, -1): 15,
+            (-1, 8): 16,
+            (8, -1): 16,
             (2, 2): 17
         }
 
