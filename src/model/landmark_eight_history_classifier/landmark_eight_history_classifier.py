@@ -47,9 +47,10 @@ class LandmarkEightHistoryClassifier(object):
 
         result_index = np.argmax(np.squeeze(result))
 
+        """
         if np.squeeze(result)[result_index] < self.score_th:
             result_index = self.invalid_value
-
+        """
         return result_index
 
 

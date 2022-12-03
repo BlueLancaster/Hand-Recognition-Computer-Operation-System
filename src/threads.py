@@ -18,8 +18,10 @@ from utils.cam_thread_tool import read_labels, calc_bounding_rect, calc_landmark
 from utils.cvfpscalc import CvFpsCalc
 from utils.drawing import draw_info_text, draw_bounding_rect, draw_moving_range, draw_point_history, draw_info
 from utils.hot_key import PPT_full_screen, back_desktop, adjust_size, scroll_down, scroll_up, paste, copy_mode, \
-    PPT_razer, PPt_next_page, PPT_previous_page, rotate_clockwise, OCR, translate, screenShot
-from utils.mouseController import left_up, mouse, mouse_moving, left_down, right_click, get_moving_range
+    PPT_razer, PPT_next_page, PPT_previous_page, rotate_clockwise, OCR, translate, screenShot, press, split_screen_left, \
+    split_screen_right, hot_key_press
+from utils.mouseController import left_up, mouse, mouse_moving, left_down, right_click, get_moving_range, \
+    left_double_click
 from utils.one_euro_filter import HandCapture
 from utils.textshot import screenshot1
 
@@ -292,7 +294,7 @@ class CamThread(QThread):
                     elif function_mode == 5:
                         back_desktop()
                     elif function_mode == 6:
-                        PPt_next_page()
+                        PPT_next_page()
                     elif function_mode == 7:
                         PPT_previous_page()
                     elif function_mode == 8:
@@ -308,7 +310,8 @@ class CamThread(QThread):
                     elif function_mode == 13:
                         scroll_down()
                     elif function_mode == 14:
-                        screenShot()
+                        pass
+                        # screenShot()
                     elif function_mode == 15:
                         mouse(results.multi_hand_landmarks[0].landmark[8].x,
                               results.multi_hand_landmarks[0].landmark[8].y)
@@ -316,6 +319,8 @@ class CamThread(QThread):
                             left_down()
                     elif function_mode == 16:
                         right_click()
+                    elif function_mode == 17:
+                        left_double_click()
                     elif function_mode == 18 or function_mode == 19:
                         self.landmark_eight.pop()
                         self.landmark_eight_history.append(self.landmark_eight)
@@ -326,8 +331,32 @@ class CamThread(QThread):
 
                     if self.last_function_mode == 18 and function_mode != 18:
                         print(18, self.landmark_eight_history_classifier_labels[self.most_common_fg_id])
+                        if self.most_common_fg_id == 1:
+                            rotate_clockwise()
+                        elif self.most_common_fg_id == 2:
+                            PPT_razer()
+                        elif self.most_common_fg_id == 3:
+                            PPT_next_page()
+                        elif self.most_common_fg_id == 4:
+                            PPT_previous_page()
+                        elif self.most_common_fg_id == 5:
+                            PPT_full_screen()
+                        elif self.most_common_fg_id == 6:
+                            press('esc')
                     if self.last_function_mode == 19 and function_mode != 19:
                         print(19, self.landmark_eight_history_classifier_labels[self.most_common_fg_id])
+                        if self.most_common_fg_id == 1:
+                            screenShot()
+                        elif self.most_common_fg_id == 2:
+                            OCR()
+                        elif self.most_common_fg_id == 3:
+                            split_screen_left()
+                        elif self.most_common_fg_id == 4:
+                            split_screen_right()
+                        elif self.most_common_fg_id == 5:
+                            hot_key_press('alt', 'tab')
+                        elif self.most_common_fg_id == 6:
+                            hot_key_press('winleft', 'd')
                     self.last_function_mode = function_mode
                     self.last_execution_time = time.time()
                     self.past_distance = distance

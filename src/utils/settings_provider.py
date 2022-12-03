@@ -115,7 +115,7 @@ class KeyBindingProvider(SettingsProvider):
     def __get_converted_settings(self):
         """
         The key type convertor between str used in file and tuple used in program
-        because tuple is not supported in json.This would modify the settings by popping and insert
+        because tuple is not supported for key in json.This would modify the settings by popping and insert
         :return: None
         """
         settings = dict()

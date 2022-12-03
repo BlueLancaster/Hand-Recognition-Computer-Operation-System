@@ -8,6 +8,7 @@ from plyer import notification
 
 from UI.main_window import Ui_MainWindow as MainWindowUI
 from UI.key_binding_caption import Ui_MainWindow as CaptionWindowUI
+from add_key_window import AddKeyWindow
 from utils.settings_provider import KeyBindingProvider, ArgumentProvider
 from threads import VideoThread, CamThread, ScreenShooter
 
@@ -39,7 +40,8 @@ class MainController(QtWidgets.QMainWindow):
         self.screen_shooter = ScreenShooter()
         self.cam_thread = CamThread(self.key_binding_provider.settings, self.arg_provider.settings)
         self.cam_thread_connect_init()
-
+        self.add_key_window = AddKeyWindow()
+        self.caption_window = QtWidgets.QMainWindow()
         # Initialize the events binding of side_menu and each page in StackedWidget
         # The events are clickEvent,enterEvent,...etc
         self.side_menu_connect_init()
@@ -47,7 +49,6 @@ class MainController(QtWidgets.QMainWindow):
         self.profile_page_connect_init()
         self.key_binding_page_connect_init()
         self.argument_page_connect_init()
-        self.caption_window = QtWidgets.QMainWindow()
 
         # for moving the main window
         self.moveFlag = False
@@ -382,6 +383,7 @@ class MainController(QtWidgets.QMainWindow):
         self.ui.del_key_btn.clicked.connect(self.del_key)
         self.ui.set_default_btn.clicked.connect(self.key_binding_provider.set_setting_default)
         self.ui.caption_btn.clicked.connect(self.open_caption_window)
+        self.ui.add_key_btn.clicked.connect(self.add_key_window.show)
 
     def argument_page_connect_init(self):
         self.ui.arg_save_btn.clicked.connect(

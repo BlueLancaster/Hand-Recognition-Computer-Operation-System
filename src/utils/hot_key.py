@@ -90,7 +90,7 @@ def back_desktop():
     pyautogui.keyUp('winleft')
 
 
-def PPt_next_page():
+def PPT_next_page():
     pyautogui.press('right')
 
 
@@ -122,10 +122,30 @@ def paste():
     pyautogui.keyUp('ctrl')
 
 
-def rotate_clockwise():
-    pyautogui.keyDown('ctrl')
-    pyautogui.keyDown('alt')
-    pyautogui.press('right')
-    pyautogui.keyUp('alt')
-    pyautogui.keyUp('ctrl')
+def press(key):
+    pyautogui.press(key)
 
+
+def hot_key_press(key1, key2):
+    pyautogui.keyDown(key1)
+    pyautogui.press(key2)
+    pyautogui.keyUp(key1)
+
+
+def rotate_clockwise():
+    pyautogui.keyDown('alt')
+    for i in range(6):
+        pyautogui.press('right')
+    pyautogui.keyUp('alt')
+
+
+def split_screen_left():
+    pyautogui.keyDown('winleft')
+    pyautogui.press('left')
+    pyautogui.keyUp('winleft')
+
+
+def split_screen_right():
+    pyautogui.keyDown('winleft')
+    pyautogui.press('right')
+    pyautogui.keyUp('winleft')
