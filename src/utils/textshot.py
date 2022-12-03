@@ -7,13 +7,12 @@ import pyperclip
 import pytesseract
 from PIL import Image
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QThread
 
 try:
     from pynotifier import Notification
 except ImportError:
     pass
-
 
 import os
 import signal
@@ -148,3 +147,7 @@ def screenshot1():
     snipper = Snipper(window)
     snipper.show()
     sys.exit(app.exec_())
+
+
+if __name__ == '__main__':
+    notify('4234')

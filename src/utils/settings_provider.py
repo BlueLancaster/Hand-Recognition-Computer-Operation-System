@@ -287,7 +287,6 @@ class ArgumentProvider(SettingsProvider):
             'model_complexity': True,
             'min_detection_confidence': 0.7,
             'min_tracking_confidence': 0.5,
-            'smooth': 5000,
             'min_cutoff': 2.0,
             'rate': 1.0
         }

@@ -18,8 +18,8 @@ from utils.cam_thread_tool import read_labels, calc_bounding_rect, calc_landmark
 from utils.cvfpscalc import CvFpsCalc
 from utils.drawing import draw_info_text, draw_bounding_rect, draw_moving_range, draw_point_history, draw_info
 from utils.hot_key import PPT_full_screen, back_desktop, adjust_size, scroll_down, scroll_up, paste, copy_mode, \
-    PPT_razer
-from utils.mouseController import left_up, mouse, mouse_moving, left_down, right_click
+    PPT_razer, PPt_next_page, PPT_previous_page, rotate_clockwise, OCR, translate, screenShot
+from utils.mouseController import left_up, mouse, mouse_moving, left_down, right_click, get_moving_range
 from utils.one_euro_filter import HandCapture
 from utils.textshot import screenshot1
 
@@ -37,7 +37,7 @@ class VideoThread(QThread):
 
     def __init__(self, arg_settings):
         super(VideoThread, self).__init__()
-        self.__video = cv.VideoCapture('../video/test.mp4')
+        self.__video = cv.VideoCapture('../video/test2.mp4')
         if self.__video.isOpened():
             print("video is ready")
         else:
@@ -63,6 +63,7 @@ class VideoThread(QThread):
                         landmarks.x = pre_joints[i][0]
                         landmarks.y = pre_joints[i][1]
                         landmarks.z = pre_joints[i][2]
+
                     self.mp_drawing.draw_landmarks(
                         frame,
                         hand_landmarks,
@@ -87,6 +88,8 @@ class CamThread(QThread):
     trigger_show_func = pyqtSignal(str)
     trigger_show_left_hand = pyqtSignal(str)
     trigger_show_right_hand = pyqtSignal(str)
+    trigger_OCR = pyqtSignal(int)
+    trigger_notify = pyqtSignal(str, str)
     mp_drawing = mp.solutions.drawing_utils
     mp_drawing_styles = mp.solutions.drawing_styles
     mp_hands = mp.solutions.hands
@@ -125,6 +128,7 @@ class CamThread(QThread):
         self.last_two_handID = [-1, -1]
         self.most_common_left_handID = 0
         self.most_common_right_handID = 0
+        self.continuous_function_mode = [3, 12, 13, 15, 18 ,19]
 
         # <--- double hands gesture history --->
         self.double_hands_history_length = 32
@@ -154,7 +158,7 @@ class CamThread(QThread):
         print('run start')
         if not self.__cam.isOpened():
             self.trigger_warning.emit(1)
-        sub_process = multiprocessing.Process(target=screenshot1)
+        # sub_process = multiprocessing.Process(target=screenshot1)
         while self.__cam.isOpened() and self.switch_state:
             fps = self.fps_cal.get()
             success, frame = self.__cam.read()
@@ -169,6 +173,8 @@ class CamThread(QThread):
             results = self.__hands.process(frame)
             frame.flags.writeable = True
             two_handID = [-1, -1]
+            self.trigger_show_left_hand.emit('未偵測到')
+            self.trigger_show_right_hand.emit('未偵測到')
             if results.multi_hand_landmarks:
                 for hand_landmarks, handedness in zip(results.multi_hand_landmarks, results.multi_handedness):
                     # preprocessing filter
@@ -184,7 +190,6 @@ class CamThread(QThread):
                             landmarks.x = pre_joints[i][0]
                             landmarks.y = pre_joints[i][1]
                             landmarks.z = pre_joints[i][2]
-
                     # Bounding box calculation
                     rect = calc_bounding_rect(debug_frame, hand_landmarks)
                     # Landmark calculation
@@ -251,7 +256,7 @@ class CamThread(QThread):
                     left_up()
                     mouse(results.multi_hand_landmarks[0].landmark[8].x,
                           results.multi_hand_landmarks[0].landmark[8].y)
-
+                """
                 elif function_mode == 17:  # two hand dynamic
                     self.double_hands_history.append(self.landmark_eight_left)
                     self.double_hands_history.append(self.landmark_eight_right)
@@ -264,32 +269,46 @@ class CamThread(QThread):
                         elif double_hands_id == 1:
                             print(11)
                             back_desktop()
-
+                """
                 if time.time() - self.last_execution_time < 0.1:
                     pass
                 else:
                     distance = get_distance(
                         results, 640, 480)
-                    if function_mode == 1:
-                        if sub_process.is_alive():
-                            print('sub process is alive')
-                        else:
-                            sub_process.start()
-                    elif function_mode == 2:
+                    if function_mode == self.last_function_mode and function_mode not in self.continuous_function_mode:
                         pass
-                        # translate()
+                    elif function_mode == 1:
+                        self.trigger_OCR.emit(1)
+                    elif function_mode == 2:
+                        text = translate()
+                        if text:
+                            self.trigger_notify.emit('翻譯文字成功', text)
+                        else:
+                            self.trigger_notify.emit('翻譯文字失敗', 'WARNING')
                     elif function_mode == 3 and self.key_binding.get(tuple(self.last_two_handID)) == 3:
                         adjust_size(distance, self.past_distance)
+                    elif function_mode == 4:
+                        PPT_full_screen()
+                    elif function_mode == 5:
+                        back_desktop()
+                    elif function_mode == 6:
+                        PPt_next_page()
+                    elif function_mode == 7:
+                        PPT_previous_page()
                     elif function_mode == 8:
                         PPT_razer()
                     elif function_mode == 9:
                         copy_mode()
                     elif function_mode == 10:
                         paste()
+                    elif function_mode == 11:
+                        rotate_clockwise()
                     elif function_mode == 12:
                         scroll_up()
                     elif function_mode == 13:
                         scroll_down()
+                    elif function_mode == 14:
+                        screenShot()
                     elif function_mode == 15:
                         mouse(results.multi_hand_landmarks[0].landmark[8].x,
                               results.multi_hand_landmarks[0].landmark[8].y)
@@ -297,16 +316,18 @@ class CamThread(QThread):
                             left_down()
                     elif function_mode == 16:
                         right_click()
-                    elif function_mode == 18:
+                    elif function_mode == 18 or function_mode == 19:
                         self.landmark_eight.pop()
                         self.landmark_eight_history.append(self.landmark_eight)
                         finger_gesture_id = self.landmark_eight_history_classifier(
-                                self.pre_processed_point_history_list)
+                            self.pre_processed_point_history_list)
                         self.dynamic_gesture_history.append(finger_gesture_id)
                         self.most_common_fg_id = Counter(self.dynamic_gesture_history).most_common()[0][0]
 
                     if self.last_function_mode == 18 and function_mode != 18:
-                        print(self.most_common_fg_id)
+                        print(18, self.landmark_eight_history_classifier_labels[self.most_common_fg_id])
+                    if self.last_function_mode == 19 and function_mode != 19:
+                        print(19, self.landmark_eight_history_classifier_labels[self.most_common_fg_id])
                     self.last_function_mode = function_mode
                     self.last_execution_time = time.time()
                     self.past_distance = distance
@@ -316,7 +337,7 @@ class CamThread(QThread):
                 self.landmark_eight_history.append([0, 0])
                 self.double_hands_history.append([0, 0])
                 self.double_hands_history.append([0, 0])
-            # debug_frame = draw_moving_range(debug_frame, get_moving_range())
+            debug_frame = draw_moving_range(debug_frame, get_moving_range())
             debug_frame = draw_point_history(debug_frame, self.landmark_eight_history)
             debug_frame = draw_info(debug_frame, fps, 0, 0)
 
@@ -383,3 +404,13 @@ class CamThread(QThread):
             return '進入雙手動態模式'
         elif code == 18:
             return '進入單手動態模式'
+
+
+class ScreenShooter(QThread):
+    trigger_OCR = pyqtSignal(str)
+
+    def __init__(self):
+        super(ScreenShooter, self).__init__()
+
+    def run(self):
+        self.trigger_OCR.emit(OCR())

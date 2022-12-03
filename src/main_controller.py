@@ -2,13 +2,14 @@ import time
 
 import PyQt5
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtGui import QPixmap, QCursor
+
 from PyQt5.QtWidgets import QTableWidgetItem
+from plyer import notification
 
 from UI.main_window import Ui_MainWindow as MainWindowUI
 from UI.key_binding_caption import Ui_MainWindow as CaptionWindowUI
 from utils.settings_provider import KeyBindingProvider, ArgumentProvider
-from threads import VideoThread, CamThread
+from threads import VideoThread, CamThread, ScreenShooter
 
 
 class MainController(QtWidgets.QMainWindow):
@@ -35,8 +36,10 @@ class MainController(QtWidgets.QMainWindow):
         self.video_thread = VideoThread(self.arg_provider.settings)
         self.video_thread_connect_init()
 
+        self.screen_shooter = ScreenShooter()
         self.cam_thread = CamThread(self.key_binding_provider.settings, self.arg_provider.settings)
         self.cam_thread_connect_init()
+
         # Initialize the events binding of side_menu and each page in StackedWidget
         # The events are clickEvent,enterEvent,...etc
         self.side_menu_connect_init()
@@ -90,6 +93,14 @@ class MainController(QtWidgets.QMainWindow):
         elif event.key() == QtCore.Qt.Key_F1:
             self.showMinimized()
 
+    def apply_profile(self):
+        """
+        Update the UI and the key binding settings in cam_thread
+        :return: None
+        """
+        self.key_binding_provider.start()
+        self.cam_thread.update_key_binding(self.key_binding_provider.settings)
+
     def save_arg(self, new_file_name, new_arg_settings):
         """
         Update the argument's setting in file and cam_thread
@@ -100,14 +111,6 @@ class MainController(QtWidgets.QMainWindow):
         self.arg_provider.update_arg_file(new_file_name, new_arg_settings)
         self.cam_thread.update_arg_settings(new_arg_settings)
 
-    def apply_profile(self):
-        """
-        Update the UI and the key binding settings in cam_thread
-        :return: None
-        """
-        self.key_binding_provider.start()
-        self.cam_thread.update_key_binding(self.key_binding_provider.settings)
-
     def get_arg(self):
         """
         Get the value from the UI
@@ -117,7 +120,6 @@ class MainController(QtWidgets.QMainWindow):
             'model_complexity': self.ui.model_complex_checkBox.isChecked(),
             'min_detection_confidence': self.ui.detection_spinBox.value(),
             'min_tracking_confidence': self.ui.tracking_spinBox.value(),
-            'smooth': self.ui.smooth_spinBox.value(),
             'min_cutoff': self.ui.min_cutoff_SpinBox.value(),
             'rate': self.ui.rate_spinBox.value()
         }
@@ -128,10 +130,10 @@ class MainController(QtWidgets.QMainWindow):
         :param settings: dict
         :return: None
         """
-        self.ui.smooth_spinBox.setValue(settings['smooth'])
         self.ui.min_cutoff_SpinBox.setValue(settings['min_cutoff'])
         self.ui.rate_spinBox.setValue(settings['rate'])
         self.ui.model_complex_checkBox.setChecked(settings['model_complexity'])
+        self.ui.model_complex_checkBox.setText((lambda: '狀態:開' if settings['model_complexity'] else '狀態:關')())
         self.ui.detection_spinBox.setValue(settings['min_detection_confidence'])
         self.ui.tracking_spinBox.setValue(settings['min_tracking_confidence'])
 
@@ -147,20 +149,21 @@ class MainController(QtWidgets.QMainWindow):
     def set_selected_arg(self, index):
         """
         Set the selected file in comboBox
-        :param index:
-        :return:
+        :param index:int - the order of the file list
+        :return: None
         """
         self.ui.arg_comboBox.setCurrentIndex(index)
 
     def del_key(self):
         """
         Set the key as default in the selected item in the key binding table
-        :return:
+        :return: None
         """
         if self.ui.key_binding_table.currentColumn() == 1 or self.ui.key_binding_table.currentColumn() == 2:
             self.ui.key_binding_table.currentItem().setText('未設置')
         else:
-            self.ui.key_binding_table.setCurrentItem(None)
+            self.ui.key_binding_table.item(self.ui.key_binding_table.currentRow(), 1).setText('未設置')
+            self.ui.key_binding_table.item(self.ui.key_binding_table.currentRow(), 2).setText('未設置')
 
     def save_key_binding_setting(self):
         """
@@ -206,6 +209,16 @@ class MainController(QtWidgets.QMainWindow):
         self.ui.profile_seleted.setText(file_name)
         self.cam_thread.update_key_binding(self.key_binding_provider.settings)
 
+    def set_profile_list_set_description(self, profile_name, description):
+        """
+        Set up the filename and it's description in UI
+        :param profile_name:
+        :param description:
+        :return:
+        """
+        self.ui.profile_name.setPlainText(profile_name)
+        self.ui.profile_description_context.setPlainText(description)
+
     def set_key_binding_table_row(self, row, value):
         """
         Set up key binding in the table
@@ -219,16 +232,6 @@ class MainController(QtWidgets.QMainWindow):
             new_item = QTableWidgetItem((lambda: value[i] if int(value[i]) != -1 else '未設置')())
             new_item.setTextAlignment(4)
             self.ui.key_binding_table.setItem(row, i, new_item)
-
-    def set_profile_list_set_description(self, profile_name, description):
-        """
-        Set up the filename and it's description in UI
-        :param profile_name:
-        :param description:
-        :return:
-        """
-        self.ui.profile_name.setPlainText(profile_name)
-        self.ui.profile_description_context.setPlainText(description)
 
     def side_menu_animation(self, event):
         """
@@ -339,6 +342,17 @@ class MainController(QtWidgets.QMainWindow):
         self.cam_thread.trigger_show_left_hand.connect(self.ui.left_hand_result_label.setText)
         self.cam_thread.trigger_show_right_hand.connect(self.ui.right_hand_result_label.setText)
         self.cam_thread.trigger_show_func.connect(self.ui.func_result_label.setText)
+        self.cam_thread.trigger_OCR.connect(self.screen_shooter.start)
+        self.screen_shooter.trigger_OCR.connect(lambda result: notification.notify(
+            # title of the notification,
+            title="OCR Result",
+            # the body of the notification
+            message=result,
+            # creating icon for the notification
+            # we need to download a icon of ico file format
+            # the notification stays for 50sec
+            timeout=5
+        ))
 
     def side_menu_connect_init(self):
         self.ui.side_menu.enterEvent = self.side_menu_animation
@@ -377,3 +391,5 @@ class MainController(QtWidgets.QMainWindow):
         self.ui.arg_add_btn.clicked.connect(self.arg_provider.create_json)
         self.ui.arg_del_btn.clicked.connect(self.arg_provider.del_json)
         self.ui.arg_test_btn.clicked.connect(self.video_start)
+        self.ui.model_complex_checkBox.clicked.connect(lambda: self.ui.model_complex_checkBox.setText(
+            (lambda: '狀態:開' if self.ui.model_complex_checkBox.isChecked() else '狀態:關')()))

@@ -12,10 +12,7 @@ import googletrans
 import pyperclip  # 用于将识别出的文字放置到剪切板中方便直接粘贴
 import pytesseract
 from PIL import ImageGrab
-
-
-def main():
-    OCR()
+from plyer import notification
 
 
 def screenShot():
@@ -43,20 +40,27 @@ def paste():
 
 
 def OCR():
-    screenShot()
     pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
     # 按ctrl+c后才执行下面的语句
     # ctrl+c保存截图至剪切板， ImageGrab从剪切板读取图片
-    img1 = ImageGrab.grabclipboard()
-    data = pytesseract.image_to_string(img1, lang="eng")
-    pyperclip.copy(data)
+    try:
+        img1 = ImageGrab.grabclipboard()
+        data = pytesseract.image_to_string(img1, lang="eng")
+        pyperclip.copy(data)
+    except Exception:
+        return '沒有截圖'
     return data
 
 
-def translate(data):
-    translator = googletrans.Translator()
-    results = translator.translate(data, dest='zh-tw', src='en')
-    pyperclip.copy(results.text)
+def translate():
+    try:
+        data = pyperclip.paste()
+        translator = googletrans.Translator()
+        results = translator.translate(data, dest='zh-tw', src='en')
+        pyperclip.copy(results.text)
+    except Exception as e:
+        return None
+    return data
 
 
 def scroll_up():
@@ -68,13 +72,12 @@ def scroll_down():
 
 
 def adjust_size(distance, past_distance):
-
-    if distance/past_distance < 0.9:
+    if distance / past_distance < 0.9:
         win32api.keybd_event(17, 0, 0, 0)  # 按下Ctrl鍵
         win32api.keybd_event(187, 0, 0, 0)  # 按下s鍵
         win32api.keybd_event(187, 0, win32con.KEYEVENTF_KEYUP, 0)  # 釋放Ctrl鍵
         win32api.keybd_event(17, 0, win32con.KEYEVENTF_KEYUP, 0)
-    elif distance/past_distance > 1.1:
+    elif distance / past_distance > 1.1:
         win32api.keybd_event(17, 0, 0, 0)  # 按下Ctrl鍵
         win32api.keybd_event(189, 0, 0, 0)  # 按下s鍵
         win32api.keybd_event(189, 0, win32con.KEYEVENTF_KEYUP, 0)  # 釋放Ctrl鍵
@@ -91,7 +94,7 @@ def PPt_next_page():
     pyautogui.press('right')
 
 
-def PPT_last_page():
+def PPT_previous_page():
     pyautogui.press('left')
 
 
@@ -102,10 +105,9 @@ def PPT_razer():
 
 
 def PPT_full_screen():
-    pyautogui.keyDown('alt')
+    pyautogui.press('alt')
     pyautogui.press('s')
     pyautogui.press('b')
-    pyautogui.keyUp('alt')
 
 
 def copy_mode():
@@ -117,5 +119,13 @@ def copy_mode():
 def paste():
     pyautogui.keyDown('ctrl')
     pyautogui.press('c')
+    pyautogui.keyUp('ctrl')
+
+
+def rotate_clockwise():
+    pyautogui.keyDown('ctrl')
+    pyautogui.keyDown('alt')
+    pyautogui.press('right')
+    pyautogui.keyUp('alt')
     pyautogui.keyUp('ctrl')
 

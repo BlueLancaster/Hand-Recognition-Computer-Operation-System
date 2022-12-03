@@ -417,7 +417,7 @@ border: 2px solid gray
           <string notr="true"/>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>3</number>
          </property>
          <widget class="QWidget" name="home_page">
           <property name="styleSheet">
@@ -691,7 +691,7 @@ border-radius:25px</string>
                        </font>
                       </property>
                       <property name="text">
-                       <string>目前使用設定黨:</string>
+                       <string>目前使用設定檔:</string>
                       </property>
                      </widget>
                     </item>
@@ -2338,66 +2338,6 @@ background-color: rgb(85, 255, 255);
               <property name="topMargin">
                <number>25</number>
               </property>
-              <item>
-               <widget class="QGroupBox" name="groupBox_5">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                  <horstretch>1</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="title">
-                 <string/>
-                </property>
-                <layout class="QFormLayout" name="formLayout_3">
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="smooth_label">
-                   <property name="font">
-                    <font>
-                     <family>Adobe 黑体 Std R</family>
-                     <pointsize>14</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>平滑系數</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="0">
-                  <widget class="QSpinBox" name="smooth_spinBox">
-                   <property name="font">
-                    <font>
-                     <family>Adobe 黑体 Std R</family>
-                     <pointsize>12</pointsize>
-                    </font>
-                   </property>
-                   <property name="maximum">
-                    <number>20000</number>
-                   </property>
-                   <property name="singleStep">
-                    <number>100</number>
-                   </property>
-                   <property name="displayIntegerBase">
-                    <number>10</number>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="0">
-                  <widget class="QLabel" name="smooth_caption">
-                   <property name="font">
-                    <font>
-                     <family>Adobe 黑体 Std R</family>
-                     <pointsize>9</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>增加滑鼠移動的滑順感</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
-              </item>
               <item>
                <widget class="QGroupBox" name="groupBox_2">
                 <property name="sizePolicy">
