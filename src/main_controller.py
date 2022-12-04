@@ -103,86 +103,6 @@ class MainController(QtWidgets.QMainWindow):
         self.key_binding_provider.start()
         self.cam_thread.update_key_binding(self.key_binding_provider.settings)
 
-    def save_arg(self, new_file_name, new_arg_settings):
-        """
-        Update the argument's setting in file and cam_thread
-        :param new_file_name: str
-        :param new_arg_settings: dict
-        :return: None
-        """
-        self.arg_provider.update_arg_file(new_file_name, new_arg_settings)
-        self.cam_thread.update_arg_settings(new_arg_settings)
-
-    def get_arg(self):
-        """
-        Get the value from the UI
-        :return: dict
-        """
-        return {
-            'model_complexity': self.ui.model_complex_checkBox.isChecked(),
-            'min_detection_confidence': self.ui.detection_spinBox.value(),
-            'min_tracking_confidence': self.ui.tracking_spinBox.value(),
-            'min_cutoff': self.ui.min_cutoff_SpinBox.value(),
-            'rate': self.ui.rate_spinBox.value()
-        }
-
-    def set_arg(self, settings):
-        """
-        Set up the UI with the settings
-        :param settings: dict
-        :return: None
-        """
-        self.ui.min_cutoff_SpinBox.setValue(settings['min_cutoff'])
-        self.ui.rate_spinBox.setValue(settings['rate'])
-        self.ui.model_complex_checkBox.setChecked(settings['model_complexity'])
-        self.ui.model_complex_checkBox.setText((lambda: '狀態:開' if settings['model_complexity'] else '狀態:關')())
-        self.ui.detection_spinBox.setValue(settings['min_detection_confidence'])
-        self.ui.tracking_spinBox.setValue(settings['min_tracking_confidence'])
-
-    def set_arg_comboBox(self, index, file_name):
-        """
-        Add the filename in the index of the argument comboBox
-        :param index:int
-        :param file_name:str
-        :return:
-        """
-        self.ui.arg_comboBox.insertItem(index, file_name)
-
-    def set_selected_arg(self, index):
-        """
-        Set the selected file in comboBox
-        :param index:int - the order of the file list
-        :return: None
-        """
-        self.ui.arg_comboBox.setCurrentIndex(index)
-
-    def del_key(self):
-        """
-        Set the key as default in the selected item in the key binding table
-        :return: None
-        """
-        if self.ui.key_binding_table.currentColumn() == 1 or self.ui.key_binding_table.currentColumn() == 2:
-            self.ui.key_binding_table.currentItem().setText('未設置')
-        else:
-            self.ui.key_binding_table.item(self.ui.key_binding_table.currentRow(), 1).setText('未設置')
-            self.ui.key_binding_table.item(self.ui.key_binding_table.currentRow(), 2).setText('未設置')
-
-    def save_key_binding_setting(self):
-        """
-        Save the key binding
-        :return: None
-        """
-        new_settings = dict()
-        new_settings['Description'] = self.key_binding_provider.settings['Description']
-        for row in range(self.ui.key_binding_table.rowCount()):
-            function_code = int(self.ui.key_binding_table.item(row, 0).text())
-            left_hand = int((lambda text: text if text != '未設置' else str(-function_code))
-                            (self.ui.key_binding_table.item(row, 1).text()))
-            right_hand = int((lambda text: text if text != '未設置' else str(-function_code))
-                             (self.ui.key_binding_table.item(row, 2).text()))
-            new_settings[(left_hand, right_hand)] = function_code
-        self.key_binding_provider.update_settings(new_settings)
-
     def set_profile_list(self, file_name):
         """
         Add the filename in the profile list
@@ -231,18 +151,157 @@ class MainController(QtWidgets.QMainWindow):
         if row == self.ui.key_binding_table.rowCount():
             self.ui.key_binding_table.setRowCount(self.ui.key_binding_table.rowCount() + 1)
         for i in range(3):
-            new_item = QTableWidgetItem((lambda: value[i] if int(value[i]) > -1 else '未設置')())
-            new_item.setTextAlignment(4)
-            self.ui.key_binding_table.setItem(row, i, new_item)
+            if i == 0:
+                new_item = QTableWidgetItem(value[i])
+                new_item.setTextAlignment(4)
+                self.ui.key_binding_table.setItem(row, i, new_item)
+            else:
+                new_item = GestureComboBox(value[i])
+                new_item.currentIndexChanged.connect(self.check_key_binding)
+                self.ui.key_binding_table.setCellWidget(row, i, new_item)
+
+    def del_key(self):
+        """
+        Set the key as default in the selected item in the key binding table
+        :return: None
+        """
+        if self.ui.key_binding_table.currentColumn() == 1 or self.ui.key_binding_table.currentColumn() == 2:
+            self.ui.key_binding_table.cellWidget(self.ui.key_binding_table.currentRow(),
+                                                 self.ui.key_binding_table.currentColumn()).setCurrentIndex(0)
+        else:
+            self.ui.key_binding_table.removeRow(self.ui.key_binding_table.currentRow())
+
+    def save_key_binding_setting(self):
+        """
+        Save the key binding
+        :return: None
+        """
+        new_settings = dict()
+        new_settings['Description'] = self.key_binding_provider.settings['Description']
+        function_code_list = set()
+        for row in range(self.ui.key_binding_table.rowCount()):
+            if self.ui.key_binding_table.item(row, 0).text().isdigit():
+                function_code_list.add(int(self.ui.key_binding_table.item(row, 0).text()))
+        for row in range(self.ui.key_binding_table.rowCount()):
+            if self.ui.key_binding_table.item(row, 0).text().isdigit():
+                function_code = int(self.ui.key_binding_table.item(row, 0).text())
+                if self.ui.key_binding_table.cellWidget(row, 1).currentText() == '未設置' \
+                        and self.ui.key_binding_table.cellWidget(row, 2).currentText() == '未設置':
+                    left_hand = int((lambda text: text if text != '未設置' else str(-function_code))
+                                    (self.ui.key_binding_table.cellWidget(row, 1).currentText()))
+                    right_hand = int((lambda text: text if text != '未設置' else str(-function_code))
+                                     (self.ui.key_binding_table.cellWidget(row, 2).currentText()))
+                else:
+                    left_hand = int((lambda text: text if text != '未設置' else -1)
+                                    (self.ui.key_binding_table.cellWidget(row, 1).currentText()))
+                    right_hand = int((lambda text: text if text != '未設置' else -1)
+                                     (self.ui.key_binding_table.cellWidget(row, 2).currentText()))
+                new_settings[(left_hand, right_hand)] = function_code
+            else:
+                function_code = self.ui.key_binding_table.item(row, 0).text()
+                temp_function_code = row
+                while temp_function_code in function_code_list:
+                    temp_function_code += 1
+                if self.ui.key_binding_table.cellWidget(row, 1).currentText() == '未設置' \
+                        and self.ui.key_binding_table.cellWidget(row, 2).currentText() == '未設置':
+                    left_hand = int((lambda text: text if text != '未設置' else -temp_function_code)
+                                    (self.ui.key_binding_table.cellWidget(row, 1).currentText()))
+                    right_hand = int((lambda text: text if text != '未設置' else -temp_function_code)
+                                     (self.ui.key_binding_table.cellWidget(row, 2).currentText()))
+                else:
+                    left_hand = int((lambda text: text if text != '未設置' else -1)
+                                    (self.ui.key_binding_table.cellWidget(row, 1).currentText()))
+                    right_hand = int((lambda text: text if text != '未設置' else -1)
+                                     (self.ui.key_binding_table.cellWidget(row, 2).currentText()))
+                new_settings[(left_hand, right_hand)] = function_code
+        self.key_binding_provider.update_settings(new_settings)
+
+    def check_key_binding(self):
+        current_row = self.ui.key_binding_table.currentRow()
+        current_col = self.ui.key_binding_table.currentColumn()
+        left_hand = self.ui.key_binding_table.cellWidget(current_row, 1).currentIndex()
+        right_hand = self.ui.key_binding_table.cellWidget(current_row, 2).currentIndex()
+        flag_same = False
+        if current_col != 0 and (left_hand != 0 or right_hand != 0):
+            for i in range(self.ui.key_binding_table.rowCount()):
+                if self.ui.key_binding_table.cellWidget(i, 1).currentIndex() == left_hand \
+                        and self.ui.key_binding_table.cellWidget(i, 2).currentIndex() == right_hand and i!=current_row:
+                    flag_same = True
+                    break
+            if flag_same:
+                self.ui.key_binding_table.cellWidget(current_row, 1).setCurrentIndex(0)
+                self.ui.key_binding_table.cellWidget(current_row, 2).setCurrentIndex(0)
 
     def add_custom_key(self, key_list: list):
-        """
-        if not key_list:
-            new_item = QTableWidgetItem()
+        if key_list:
+            new_row = self.ui.key_binding_table.rowCount()
+            self.ui.key_binding_table.setRowCount(self.ui.key_binding_table.rowCount() + 1)
+            key = ''
+            for i in range(len(key_list)):
+                key += key_list[i]
+                if i != len(key_list) - 1:
+                    key += '/'
+            print(key)
+            new_item = QTableWidgetItem(key)
             new_item.setTextAlignment(4)
-            self.ui.key_binding_table.setItem(self.ui.key_binding_table.rowCount(),
-                                              self.ui.key_binding_table.columnCount(),)
-                                              """
+            self.ui.key_binding_table.setItem(new_row, 0, new_item)
+            for i in range(1, 3):
+                new_item = GestureComboBox(-self.ui.key_binding_table.rowCount())
+                new_item.currentIndexChanged.connect(self.check_key_binding)
+                self.ui.key_binding_table.setCellWidget(new_row, i, new_item)
+
+    def save_arg(self, new_file_name, new_arg_settings):
+        """
+        Update the argument's setting in file and cam_thread
+        :param new_file_name: str
+        :param new_arg_settings: dict
+        :return: None
+        """
+        self.arg_provider.update_arg_file(new_file_name, new_arg_settings)
+        self.cam_thread.update_arg_settings(new_arg_settings)
+
+    def get_arg(self):
+        """
+        Get the value from the UI
+        :return: dict
+        """
+        return {
+            'model_complexity': self.ui.model_complex_checkBox.isChecked(),
+            'min_detection_confidence': self.ui.detection_spinBox.value(),
+            'min_tracking_confidence': self.ui.tracking_spinBox.value(),
+            'min_cutoff': self.ui.min_cutoff_SpinBox.value(),
+            'rate': self.ui.rate_spinBox.value()
+        }
+
+    def set_arg(self, settings):
+        """
+        Set up the UI with the settings
+        :param settings: dict
+        :return: None
+        """
+        self.ui.min_cutoff_SpinBox.setValue(settings['min_cutoff'])
+        self.ui.rate_spinBox.setValue(settings['rate'])
+        self.ui.model_complex_checkBox.setChecked(settings['model_complexity'])
+        self.ui.model_complex_checkBox.setText((lambda: '狀態:開' if settings['model_complexity'] else '狀態:關')())
+        self.ui.detection_spinBox.setValue(settings['min_detection_confidence'])
+        self.ui.tracking_spinBox.setValue(settings['min_tracking_confidence'])
+
+    def set_arg_list(self, index, file_name):
+        """
+        Add the filename in the index of the argument comboBox
+        :param index:int
+        :param file_name:str
+        :return:
+        """
+        self.ui.arg_comboBox.insertItem(index, file_name)
+
+    def set_selected_arg(self, index):
+        """
+        Set the selected file in comboBox
+        :param index:int - the order of the file list
+        :return: None
+        """
+        self.ui.arg_comboBox.setCurrentIndex(index)
 
     def side_menu_animation(self, event):
         """
@@ -348,7 +407,7 @@ class MainController(QtWidgets.QMainWindow):
         )
 
     def argument_provider_connect_init(self):
-        self.arg_provider.trigger_load_arg_list.connect(self.set_arg_comboBox)
+        self.arg_provider.trigger_load_arg_list.connect(self.set_arg_list)
         self.arg_provider.trigger_selected.connect(self.set_selected_arg)
         self.arg_provider.trigger_clear_list.connect(self.ui.arg_comboBox.clear)
         self.arg_provider.trigger_load_arg.connect(self.set_arg)
@@ -408,9 +467,6 @@ class MainController(QtWidgets.QMainWindow):
         self.ui.add_key_btn.clicked.connect(self.add_key_window.show)
         self.add_key_window.trigger_add_key.connect(self.add_custom_key)
 
-    def check_key_binding(self, event):
-        print(self.ui.key_binding_table.currentItem().text())
-
     def argument_page_connect_init(self):
         self.ui.arg_save_btn.clicked.connect(
             lambda: self.save_arg(self.ui.arg_comboBox.currentText(), self.get_arg()))
@@ -426,6 +482,8 @@ class MainController(QtWidgets.QMainWindow):
 class GestureComboBox(QComboBox):
     def __init__(self, current):
         super(GestureComboBox, self).__init__()
-        for i in range(8):
+        self.addItem('未設置')
+        for i in range(9):
             self.addItem(str(i))
-        self.setCurrentIndex(current)
+        self.setCurrentIndex(int(current) + 1 if int(current) > -1 else 0)
+        self.setMaximumWidth(80)

@@ -151,3 +151,20 @@ def split_screen_right():
     pyautogui.press('right')
     pyautogui.press('right')
     pyautogui.keyUp('winleft')
+
+
+def custom_hot_key(key_str: str):
+    key_list = key_str.split(sep='/')
+    key_amount = len(key_list)
+    if key_amount == 1:
+        pyautogui.press(key_list[0])
+    elif key_amount == 2:
+        pyautogui.keyDown(key_list[0])
+        pyautogui.press(key_list[1])
+        pyautogui.keyUp(key_list[0])
+    elif key_amount == 3:
+        pyautogui.keyDown(key_list[0])
+        pyautogui.keyDown(key_list[1])
+        pyautogui.press(key_list[2])
+        pyautogui.keyUp(key_list[1])
+        pyautogui.keyUp(key_list[0])

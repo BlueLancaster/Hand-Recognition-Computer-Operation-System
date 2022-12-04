@@ -19,7 +19,7 @@ from utils.cvfpscalc import CvFpsCalc
 from utils.drawing import draw_info_text, draw_bounding_rect, draw_moving_range, draw_point_history, draw_info
 from utils.hot_key import PPT_full_screen, back_desktop, adjust_size, scroll_down, scroll_up, paste, copy_mode, \
     PPT_razer, PPT_next_page, PPT_previous_page, rotate_clockwise, OCR, translate, screenShot, press, split_screen_left, \
-    split_screen_right, hot_key_press
+    split_screen_right, hot_key_press, custom_hot_key
 from utils.mouseController import left_up, mouse, mouse_moving, left_down, right_click, get_moving_range, \
     left_double_click
 from utils.one_euro_filter import HandCapture
@@ -252,26 +252,12 @@ class CamThread(QThread):
                 # get the function binding on keys
                 function_mode = self.key_binding.get(tuple(two_handID))
                 self.trigger_show_func.emit(self.function_label(function_mode), 1)
-
                 # do  something corresponding to function code
+                print(function_mode)
                 if function_mode == 0:  # Point gesture
                     left_up()
                     mouse(results.multi_hand_landmarks[0].landmark[8].x,
                           results.multi_hand_landmarks[0].landmark[8].y)
-                """
-                elif function_mode == 17:  # two hand dynamic
-                    self.double_hands_history.append(self.landmark_eight_left)
-                    self.double_hands_history.append(self.landmark_eight_right)
-                    # print(double_hands_history)
-                    if len(self.pre_processed_double_hands_history_list) == (self.double_hands_history_length * 2):
-                        double_hands_id = self.double_hands_classifier(self.pre_processed_double_hands_history_list)
-                        if double_hands_id == 0:
-                            print(00)
-                            PPT_full_screen()
-                        elif double_hands_id == 1:
-                            print(11)
-                            back_desktop()
-                """
                 if time.time() - self.last_execution_time < 0.1:
                     pass
                 else:
@@ -279,6 +265,8 @@ class CamThread(QThread):
                         results, 640, 480)
                     if function_mode == self.last_function_mode and function_mode not in self.continuous_function_mode:
                         pass
+                    elif isinstance(function_mode, str):
+                        custom_hot_key(function_mode)
                     elif function_mode == 1:
                         self.trigger_OCR.emit(1)
                     elif function_mode == 2:
@@ -401,7 +389,9 @@ class CamThread(QThread):
 
     @staticmethod
     def function_label(code):
-        if code == 0:
+        if isinstance(code, str):
+            return code
+        elif code == 0:
             return '操作滑鼠模式'
         elif code == 1:
             return '截圖文字辨識'
