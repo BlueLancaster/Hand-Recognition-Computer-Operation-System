@@ -87,7 +87,7 @@ class VideoThread(QThread):
 class CamThread(QThread):
     trigger_warning = pyqtSignal(int)
     trigger_display = pyqtSignal(QGraphicsScene)
-    trigger_show_func = pyqtSignal(str)
+    trigger_show_func = pyqtSignal(str, int)
     trigger_show_left_hand = pyqtSignal(str)
     trigger_show_right_hand = pyqtSignal(str)
     trigger_OCR = pyqtSignal(int)
@@ -130,7 +130,7 @@ class CamThread(QThread):
         self.last_two_handID = [-1, -1]
         self.most_common_left_handID = 0
         self.most_common_right_handID = 0
-        self.continuous_function_mode = [3, 12, 13, 15, 18 ,19]
+        self.continuous_function_mode = [3, 12, 13, 15, 18, 19]
 
         # <--- double hands gesture history --->
         self.double_hands_history_length = 32
@@ -251,7 +251,7 @@ class CamThread(QThread):
                                                           single_hand_classifier_labels[self.most_common_right_handID])
                 # get the function binding on keys
                 function_mode = self.key_binding.get(tuple(two_handID))
-                self.trigger_show_func.emit(self.function_label(function_mode))
+                self.trigger_show_func.emit(self.function_label(function_mode), 1)
 
                 # do  something corresponding to function code
                 if function_mode == 0:  # Point gesture
@@ -284,7 +284,7 @@ class CamThread(QThread):
                     elif function_mode == 2:
                         text = translate()
                         if text:
-                            self.trigger_notify.emit('翻譯文字成功', text)
+                            self.trigger_notify.emit('翻譯文字成功', 'success')
                         else:
                             self.trigger_notify.emit('翻譯文字失敗', 'WARNING')
                     elif function_mode == 3 and self.key_binding.get(tuple(self.last_two_handID)) == 3:
@@ -322,6 +322,7 @@ class CamThread(QThread):
                     elif function_mode == 17:
                         left_double_click()
                     elif function_mode == 18 or function_mode == 19:
+                        self.dynamic_gesture_history.clear()
                         self.landmark_eight.pop()
                         self.landmark_eight_history.append(self.landmark_eight)
                         finger_gesture_id = self.landmark_eight_history_classifier(
@@ -331,6 +332,8 @@ class CamThread(QThread):
 
                     if self.last_function_mode == 18 and function_mode != 18:
                         print(18, self.landmark_eight_history_classifier_labels[self.most_common_fg_id])
+                        self.trigger_show_func.emit(
+                            self.landmark_eight_history_classifier_labels[self.most_common_fg_id], 15)
                         if self.most_common_fg_id == 1:
                             rotate_clockwise()
                         elif self.most_common_fg_id == 2:
@@ -345,18 +348,21 @@ class CamThread(QThread):
                             press('esc')
                     if self.last_function_mode == 19 and function_mode != 19:
                         print(19, self.landmark_eight_history_classifier_labels[self.most_common_fg_id])
+                        self.trigger_show_func.emit(
+                            self.landmark_eight_history_classifier_labels[self.most_common_fg_id], 15j)
                         if self.most_common_fg_id == 1:
                             screenShot()
                         elif self.most_common_fg_id == 2:
-                            OCR()
+                            self.trigger_OCR.emit(1)
                         elif self.most_common_fg_id == 3:
-                            split_screen_left()
-                        elif self.most_common_fg_id == 4:
                             split_screen_right()
+                        elif self.most_common_fg_id == 4:
+                            split_screen_left()
                         elif self.most_common_fg_id == 5:
                             hot_key_press('alt', 'tab')
                         elif self.most_common_fg_id == 6:
                             hot_key_press('winleft', 'd')
+
                     self.last_function_mode = function_mode
                     self.last_execution_time = time.time()
                     self.past_distance = distance

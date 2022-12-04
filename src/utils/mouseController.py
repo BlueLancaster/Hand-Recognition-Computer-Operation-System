@@ -75,20 +75,20 @@ def mouse(landmark_eight_x, landmark_eight_y):
 
     # （6）确定鼠标移动的范围
     # 将食指的移动范围从预制的窗口范围，映射到电脑屏幕范围
-    smoothen = 2000
+    #smoothen = 2000
 
     temp = np.array([x1, y1]) - \
         np.array([pastLocalation_x, pastLocalation_y])
     distance = math.hypot(temp[0], temp[1])
 
-    temp[0] = temp[0]/smoothen
-    temp[1] = temp[1]/smoothen
+    #temp[0] = temp[0]/smoothen
+    #temp[1] = temp[1]/smoothen
 
-    for i in range(smoothen):
-        pastLocalation_x = pastLocalation_x + temp[0]/2
-        pastLocalation_y = pastLocalation_y + temp[1]/2
-        pos = (int(pastLocalation_x), int(pastLocalation_y))
-        win32api.SetCursorPos(pos)
+    #for i in range(smoothen):
+    pastLocalation_x = pastLocalation_x + temp[0]
+    pastLocalation_y = pastLocalation_y + temp[1]
+    pos = (int(pastLocalation_x), int(pastLocalation_y))
+    win32api.SetCursorPos(pos)
 
 
 def test(arg):

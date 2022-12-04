@@ -21,7 +21,6 @@ def screenShot():
     pyautogui.press('s')
     pyautogui.keyUp('winleft')
     pyautogui.keyUp('shift')
-    time.sleep(5)
     return
 
 
@@ -48,8 +47,8 @@ def OCR():
         data = pytesseract.image_to_string(img1, lang="eng")
         pyperclip.copy(data)
     except Exception:
-        return '沒有截圖'
-    return data
+        return 'screenshot is not existed'
+    return 'success'
 
 
 def translate():
@@ -72,12 +71,12 @@ def scroll_down():
 
 
 def adjust_size(distance, past_distance):
-    if distance / past_distance < 0.9:
+    if distance / past_distance < 0.95:
         win32api.keybd_event(17, 0, 0, 0)  # 按下Ctrl鍵
         win32api.keybd_event(187, 0, 0, 0)  # 按下s鍵
         win32api.keybd_event(187, 0, win32con.KEYEVENTF_KEYUP, 0)  # 釋放Ctrl鍵
         win32api.keybd_event(17, 0, win32con.KEYEVENTF_KEYUP, 0)
-    elif distance / past_distance > 1.1:
+    elif distance / past_distance > 1.05:
         win32api.keybd_event(17, 0, 0, 0)  # 按下Ctrl鍵
         win32api.keybd_event(189, 0, 0, 0)  # 按下s鍵
         win32api.keybd_event(189, 0, win32con.KEYEVENTF_KEYUP, 0)  # 釋放Ctrl鍵
@@ -142,10 +141,13 @@ def rotate_clockwise():
 def split_screen_left():
     pyautogui.keyDown('winleft')
     pyautogui.press('left')
+    time.sleep(0.2)
+    pyautogui.press('left')
     pyautogui.keyUp('winleft')
 
 
 def split_screen_right():
     pyautogui.keyDown('winleft')
+    pyautogui.press('right')
     pyautogui.press('right')
     pyautogui.keyUp('winleft')

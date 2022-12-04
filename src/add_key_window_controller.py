@@ -1,15 +1,19 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5.QtCore import pyqtSignal
+
 from UI.add_key_window import Ui_AddKeyWindow as AddKeyWindowUI
 
 
 class AddKeyWindow(QtWidgets.QMainWindow):
+    trigger_add_key = pyqtSignal(list)
+
     def __init__(self):
         super().__init__()
         self.ui = AddKeyWindowUI()
         self.ui.setupUi(self)
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
         self.label_flag = [False, False, False]
-        self.label = [self.ui.label_2, self.ui.label_3, self.ui.label_4]
+        self.labels = [self.ui.label_2, self.ui.label_3, self.ui.label_4]
         self.special_key = {
             16777223: 'del',
             16777248: 'shift',
@@ -23,8 +27,12 @@ class AddKeyWindow(QtWidgets.QMainWindow):
             16777217: 'tab',
             16777250: 'win',
             16777219: 'backspace',
-            16777252: 'capslock'
+            16777252: 'capslock',
+            16777220: 'enter'
         }
+
+        for i in range(3):
+            self.labels[i].mouseDoubleClickEvent = lambda event: self.reset()
 
     def keyPressEvent(self, event):
         """
@@ -34,24 +42,31 @@ class AddKeyWindow(QtWidgets.QMainWindow):
         """
         text = None
         if event.key() == QtCore.Qt.Key_Escape:
+            result_list = []
+            for i in range(3):
+                if self.labels[i].text() != '未設置' :
+                    result_list.append(self.labels[i].text())
+            self.trigger_add_key.emit(result_list)
             self.reset()
             self.close()
-        elif event.key() == QtCore.Qt.Key_Enter:
-            pass
+            return
         elif 16777264 <= event.key() <= 16777275:
             text = 'f' + str(event.key() - 16777263)
         elif self.special_key.get(event.key()):
             text = self.special_key.get(event.key())
         else:
-            text = chr(event.key()).lower()
+            try:
+                text = chr(event.key()).lower()
+            except:
+                return
 
         for i in range(3):
             if not self.label_flag[i]:
-                self.label[i].setText(text)
+                self.labels[i].setText(text)
                 self.label_flag[i] = True
                 break
 
     def reset(self):
-
-        self.label[1].setText('未設置')
-        self.label_flag[1] = False
+        for i in range(3):
+            self.labels[i].setText('未設置')
+            self.label_flag[i] = False

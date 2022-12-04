@@ -3,12 +3,12 @@ import time
 import PyQt5
 from PyQt5 import QtWidgets, QtCore, QtGui
 
-from PyQt5.QtWidgets import QTableWidgetItem
+from PyQt5.QtWidgets import QTableWidgetItem, QComboBox
 from plyer import notification
 
 from UI.main_window import Ui_MainWindow as MainWindowUI
 from UI.key_binding_caption import Ui_MainWindow as CaptionWindowUI
-from add_key_window import AddKeyWindow
+from add_key_window_controller import AddKeyWindow
 from utils.settings_provider import KeyBindingProvider, ArgumentProvider
 from threads import VideoThread, CamThread, ScreenShooter
 
@@ -23,6 +23,7 @@ class MainController(QtWidgets.QMainWindow):
         self.animation2 = None
         self.powerBtn_state = False
         self.profile_info_state = True
+        self.function_mode_duration = 0
         # Initialize main_window
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
         self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
@@ -175,9 +176,9 @@ class MainController(QtWidgets.QMainWindow):
         new_settings['Description'] = self.key_binding_provider.settings['Description']
         for row in range(self.ui.key_binding_table.rowCount()):
             function_code = int(self.ui.key_binding_table.item(row, 0).text())
-            left_hand = int((lambda text: text if text != '未設置' else '-1')
+            left_hand = int((lambda text: text if text != '未設置' else str(-function_code))
                             (self.ui.key_binding_table.item(row, 1).text()))
-            right_hand = int((lambda text: text if text != '未設置' else '-1')
+            right_hand = int((lambda text: text if text != '未設置' else str(-function_code))
                              (self.ui.key_binding_table.item(row, 2).text()))
             new_settings[(left_hand, right_hand)] = function_code
         self.key_binding_provider.update_settings(new_settings)
@@ -224,15 +225,24 @@ class MainController(QtWidgets.QMainWindow):
         """
         Set up key binding in the table
         :param row: int
-        :param value: int
+        :param value: list
         :return: None
         """
         if row == self.ui.key_binding_table.rowCount():
             self.ui.key_binding_table.setRowCount(self.ui.key_binding_table.rowCount() + 1)
         for i in range(3):
-            new_item = QTableWidgetItem((lambda: value[i] if int(value[i]) != -1 else '未設置')())
+            new_item = QTableWidgetItem((lambda: value[i] if int(value[i]) > -1 else '未設置')())
             new_item.setTextAlignment(4)
             self.ui.key_binding_table.setItem(row, i, new_item)
+
+    def add_custom_key(self, key_list: list):
+        """
+        if not key_list:
+            new_item = QTableWidgetItem()
+            new_item.setTextAlignment(4)
+            self.ui.key_binding_table.setItem(self.ui.key_binding_table.rowCount(),
+                                              self.ui.key_binding_table.columnCount(),)
+                                              """
 
     def side_menu_animation(self, event):
         """
@@ -274,6 +284,13 @@ class MainController(QtWidgets.QMainWindow):
         icon.addPixmap(QtGui.QPixmap(':/icons/icons/' + icon_name + '.png'), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.ui.power_btn.setIcon(icon)
         self.powerBtn_state = not self.powerBtn_state
+
+    def show_function_mode(self, result, duration):
+        if self.function_mode_duration <= 0:
+            self.ui.func_result_label.setText(result)
+            self.function_mode_duration = duration
+        else:
+            self.function_mode_duration -= 1
 
     def open_caption_window(self):
         """
@@ -317,6 +334,19 @@ class MainController(QtWidgets.QMainWindow):
         self.ui.power_btn.setIcon(icon)
         self.ui.power_btn.setEnabled(False)
 
+    @staticmethod
+    def show_notification(title, content):
+        notification.notify(
+            # title of the notification,
+            title=title,
+            # the body of the notification
+            message=content,
+            # creating icon for the notification
+            # we need to download a icon of ico file format
+            # the notification stays for 50sec
+            timeout=2
+        )
+
     def argument_provider_connect_init(self):
         self.arg_provider.trigger_load_arg_list.connect(self.set_arg_comboBox)
         self.arg_provider.trigger_selected.connect(self.set_selected_arg)
@@ -342,18 +372,10 @@ class MainController(QtWidgets.QMainWindow):
         self.cam_thread.trigger_display.connect(self.cam_display)
         self.cam_thread.trigger_show_left_hand.connect(self.ui.left_hand_result_label.setText)
         self.cam_thread.trigger_show_right_hand.connect(self.ui.right_hand_result_label.setText)
-        self.cam_thread.trigger_show_func.connect(self.ui.func_result_label.setText)
+        self.cam_thread.trigger_show_func.connect(self.show_function_mode)
         self.cam_thread.trigger_OCR.connect(self.screen_shooter.start)
-        self.screen_shooter.trigger_OCR.connect(lambda result: notification.notify(
-            # title of the notification,
-            title="OCR Result",
-            # the body of the notification
-            message=result,
-            # creating icon for the notification
-            # we need to download a icon of ico file format
-            # the notification stays for 50sec
-            timeout=5
-        ))
+        self.screen_shooter.trigger_OCR.connect(lambda result: self.show_notification('OCR Result', result))
+        self.cam_thread.trigger_notify.connect(self.show_notification)
 
     def side_menu_connect_init(self):
         self.ui.side_menu.enterEvent = self.side_menu_animation
@@ -384,6 +406,10 @@ class MainController(QtWidgets.QMainWindow):
         self.ui.set_default_btn.clicked.connect(self.key_binding_provider.set_setting_default)
         self.ui.caption_btn.clicked.connect(self.open_caption_window)
         self.ui.add_key_btn.clicked.connect(self.add_key_window.show)
+        self.add_key_window.trigger_add_key.connect(self.add_custom_key)
+
+    def check_key_binding(self, event):
+        print(self.ui.key_binding_table.currentItem().text())
 
     def argument_page_connect_init(self):
         self.ui.arg_save_btn.clicked.connect(
@@ -395,3 +421,11 @@ class MainController(QtWidgets.QMainWindow):
         self.ui.arg_test_btn.clicked.connect(self.video_start)
         self.ui.model_complex_checkBox.clicked.connect(lambda: self.ui.model_complex_checkBox.setText(
             (lambda: '狀態:開' if self.ui.model_complex_checkBox.isChecked() else '狀態:關')()))
+
+
+class GestureComboBox(QComboBox):
+    def __init__(self, current):
+        super(GestureComboBox, self).__init__()
+        for i in range(8):
+            self.addItem(str(i))
+        self.setCurrentIndex(current)
