@@ -374,8 +374,6 @@ class MainController(QtWidgets.QMainWindow):
         :param duration: the lasting based on fps
         :return: None
         """
-        print(result, duration, sep=':')
-        print(self.function_mode_duration)
         if self.function_mode_duration <= 0:
             self.ui.func_result_label.setText(result)
             self.function_mode_duration = duration

@@ -27,7 +27,7 @@ class SingleHandClassifier(object):
 
         result = self.interpreter.get_tensor(output_details_tensor_index)
 
-        #print(np.max(tf.nn.softmax(result).numpy()))
+        # print(np.max(tf.nn.softmax(result).numpy()))
 
         result_index = np.argmax(np.squeeze(result))
 

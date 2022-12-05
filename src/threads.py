@@ -230,7 +230,7 @@ class CamThread(QThread):
                                                           single_hand_classifier_labels[self.most_common_right_handID])
                 # get the function binding on keys
                 function_mode = self.key_binding.get(tuple(two_handID))
-                self.trigger_show_func.emit(self.function_label(function_mode))
+                self.trigger_show_func.emit(self.function_label(function_mode), 1)
                 # do  something corresponding to function code
                 if function_mode == 0:  # Point gesture
                     left_up()
@@ -335,7 +335,7 @@ class CamThread(QThread):
 
             else:
                 self.landmark_eight_history.append([0, 0])
-                self.trigger_show_func.emit(' ')
+                self.trigger_show_func.emit(' ', 1)
             debug_frame = draw_moving_range(debug_frame, get_moving_range())
             debug_frame = draw_point_history(debug_frame, self.landmark_eight_history)
             debug_frame = draw_info(debug_frame, fps, 0, 0)
