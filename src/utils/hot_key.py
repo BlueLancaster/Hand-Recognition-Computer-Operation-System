@@ -111,13 +111,13 @@ def PPT_full_screen():
 
 def copy_mode():
     pyautogui.keyDown('ctrl')
-    pyautogui.press('v')
+    pyautogui.press('c')
     pyautogui.keyUp('ctrl')
 
 
 def paste():
     pyautogui.keyDown('ctrl')
-    pyautogui.press('c')
+    pyautogui.press('v')
     pyautogui.keyUp('ctrl')
 
 

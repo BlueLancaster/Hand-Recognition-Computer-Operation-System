@@ -1,5 +1,4 @@
 import copy
-import multiprocessing
 import time
 from collections import deque, Counter
 
@@ -10,7 +9,6 @@ from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QGraphicsScene
 
-from model.double_hands_classifier.double_hands_classifier import DoubleHandsClassifier
 from model.single_hand_classifier.single_hand_classifier import SingleHandClassifier
 from model.landmark_eight_history_classifier.landmark_eight_history_classifier import LandmarkEightHistoryClassifier
 from utils.cam_thread_tool import read_labels, calc_bounding_rect, calc_landmark_list, pre_process_landmark, \
@@ -20,10 +18,9 @@ from utils.drawing import draw_info_text, draw_bounding_rect, draw_moving_range,
 from utils.hot_key import PPT_full_screen, back_desktop, adjust_size, scroll_down, scroll_up, paste, copy_mode, \
     PPT_razer, PPT_next_page, PPT_previous_page, rotate_clockwise, OCR, translate, screenShot, press, split_screen_left, \
     split_screen_right, hot_key_press, custom_hot_key
-from utils.mouseController import left_up, mouse, mouse_moving, left_down, right_click, get_moving_range, \
+from utils.mouseController import left_up, mouse, left_down, right_click, get_moving_range, \
     left_double_click
 from utils.one_euro_filter import HandCapture
-from utils.textshot import screenshot1
 
 
 class VideoThread(QThread):
@@ -39,7 +36,7 @@ class VideoThread(QThread):
 
     def __init__(self, arg_settings):
         super(VideoThread, self).__init__()
-        self.__video = cv.VideoCapture('../video/test2.mp4')
+        self.__video = cv.VideoCapture('../video/test.mp4')
         if self.__video.isOpened():
             print("video is ready")
         else:
@@ -99,7 +96,7 @@ class CamThread(QThread):
     def __init__(self, key_binding_setting, arg_settings):
         # init
         super(CamThread, self).__init__()
-        self.switch_state = False
+        self.__switch_state = False  # save the state of the  cam
         # <---cap settings --->
         self.__cam = cv.VideoCapture(0)
         if self.__cam.isOpened():
@@ -131,37 +128,27 @@ class CamThread(QThread):
         self.most_common_left_handID = 0
         self.most_common_right_handID = 0
         self.continuous_function_mode = [3, 12, 13, 15, 18, 19]
-
-        # <--- double hands gesture history --->
-        self.double_hands_history_length = 32
-        self.double_hands_history = deque(maxlen=self.double_hands_history_length)
-        self.pre_processed_double_hands_history_list = []
-        self.landmark_eight_left = [0, 0]
-        self.landmark_eight_right = [0, 0]
         self.landmark_eight = None
         self.pre_processed_point_history_list = None
 
         # <---model setting--->
         self.single_hand_classifier = SingleHandClassifier()
         self.landmark_eight_history_classifier = LandmarkEightHistoryClassifier()
-        self.double_hands_classifier = DoubleHandsClassifier()
         self.single_hand_classifier_labels = read_labels(
             'model/single_hand_classifier/single_hand_classifier_label.csv')
         self.landmark_eight_history_classifier_labels = read_labels(
             'model/landmark_eight_history_classifier/landmark_eight_history_classifier_label.csv')
-        self.double_hands_classifier_labels = read_labels(
-            'model/double_hands_classifier/double_hands_classifier_label.csv')
 
         # <--- variables for mouse --->
         self.previous_pos = [0, 0]
         self.past_distance = 1
 
     def run(self):
-        print('run start')
+        # check the cam state and determine if send the warning signal to UI
         if not self.__cam.isOpened():
             self.trigger_warning.emit(1)
-        # sub_process = multiprocessing.Process(target=screenshot1)
-        while self.__cam.isOpened() and self.switch_state:
+        # The state can be change by the button in UI
+        while self.__cam.isOpened() and self.__switch_state:
             fps = self.fps_cal.get()
             success, frame = self.__cam.read()
             if not success:
@@ -179,7 +166,7 @@ class CamThread(QThread):
             self.trigger_show_right_hand.emit('未偵測到')
             if results.multi_hand_landmarks:
                 for hand_landmarks, handedness in zip(results.multi_hand_landmarks, results.multi_handedness):
-                    # preprocessing filter
+                    # preprocessing filter respectively
                     if handedness.classification[0].label == 'Left':
                         pre_joints = self.left_hand_capture.process(hand_landmarks)
                         for i, landmarks in enumerate(hand_landmarks.landmark):
@@ -205,22 +192,14 @@ class CamThread(QThread):
                     # Hand sign classification
                     hand_sign_id = self.single_hand_classifier(pre_processed_landmark_list)
                     # single most setting
-                    if len(results.multi_hand_landmarks) == 2:
-                        self.pre_processed_double_hands_history_list = pre_process_point_history(debug_frame,
-                                                                                                 self.double_hands_history)
                     if handedness.classification[0].label == 'Left':
                         self.left_single_hand_history.append(hand_sign_id)
                         self.most_common_left_handID = Counter(self.left_single_hand_history).most_common(1)[0][0]
                         two_handID[0] = self.most_common_left_handID
-                        self.landmark_eight_left = [
-                            landmark_list[8][0], landmark_list[8][1]]
-
                     else:
                         self.right_single_hand_history.append(hand_sign_id)
                         self.most_common_right_handID = Counter(self.right_single_hand_history).most_common(1)[0][0]
                         two_handID[1] = self.most_common_right_handID
-                        self.landmark_eight_right = [
-                            landmark_list[8][0], landmark_list[8][1]]
 
                     # Drawing part
                     debug_frame = draw_bounding_rect(self.use_rect, debug_frame, rect)
@@ -251,13 +230,13 @@ class CamThread(QThread):
                                                           single_hand_classifier_labels[self.most_common_right_handID])
                 # get the function binding on keys
                 function_mode = self.key_binding.get(tuple(two_handID))
-                self.trigger_show_func.emit(self.function_label(function_mode), 1)
+                self.trigger_show_func.emit(self.function_label(function_mode))
                 # do  something corresponding to function code
-                print(function_mode)
                 if function_mode == 0:  # Point gesture
                     left_up()
                     mouse(results.multi_hand_landmarks[0].landmark[8].x,
                           results.multi_hand_landmarks[0].landmark[8].y)
+                # function mode cool down
                 if time.time() - self.last_execution_time < 0.1:
                     pass
                 else:
@@ -319,9 +298,8 @@ class CamThread(QThread):
                         self.most_common_fg_id = Counter(self.dynamic_gesture_history).most_common()[0][0]
 
                     if self.last_function_mode == 18 and function_mode != 18:
-                        print(18, self.landmark_eight_history_classifier_labels[self.most_common_fg_id])
                         self.trigger_show_func.emit(
-                            self.landmark_eight_history_classifier_labels[self.most_common_fg_id], 15)
+                            self.landmark_eight_history_classifier_labels[self.most_common_fg_id], 10)
                         if self.most_common_fg_id == 1:
                             rotate_clockwise()
                         elif self.most_common_fg_id == 2:
@@ -335,9 +313,8 @@ class CamThread(QThread):
                         elif self.most_common_fg_id == 6:
                             press('esc')
                     if self.last_function_mode == 19 and function_mode != 19:
-                        print(19, self.landmark_eight_history_classifier_labels[self.most_common_fg_id])
                         self.trigger_show_func.emit(
-                            self.landmark_eight_history_classifier_labels[self.most_common_fg_id], 15j)
+                            self.landmark_eight_history_classifier_labels[self.most_common_fg_id], 10)
                         if self.most_common_fg_id == 1:
                             screenShot()
                         elif self.most_common_fg_id == 2:
@@ -358,8 +335,7 @@ class CamThread(QThread):
 
             else:
                 self.landmark_eight_history.append([0, 0])
-                self.double_hands_history.append([0, 0])
-                self.double_hands_history.append([0, 0])
+                self.trigger_show_func.emit(' ')
             debug_frame = draw_moving_range(debug_frame, get_moving_range())
             debug_frame = draw_point_history(debug_frame, self.landmark_eight_history)
             debug_frame = draw_info(debug_frame, fps, 0, 0)
@@ -381,10 +357,10 @@ class CamThread(QThread):
         self.key_binding = new_key_binding_settings
 
     def switching_state(self):
-        if self.switch_state:
-            self.switch_state = False
+        if self.__switch_state:
+            self.__switch_state = False
         else:
-            self.switch_state = True
+            self.__switch_state = True
             self.start()
 
     @staticmethod
@@ -426,12 +402,17 @@ class CamThread(QThread):
         elif code == 16:
             return '滑鼠右鍵單點'
         elif code == 17:
-            return '進入雙手動態模式'
+            return '滑鼠左鍵雙點擊'
         elif code == 18:
+            return '進入單手動態模式'
+        elif code == 19:
             return '進入單手動態模式'
 
 
 class ScreenShooter(QThread):
+    """
+    A thread avoid blocking the cam thread
+    """
     trigger_OCR = pyqtSignal(str)
 
     def __init__(self):

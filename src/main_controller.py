@@ -3,7 +3,7 @@ import time
 import PyQt5
 from PyQt5 import QtWidgets, QtCore, QtGui
 
-from PyQt5.QtWidgets import QTableWidgetItem, QComboBox
+from PyQt5.QtWidgets import QTableWidgetItem, QComboBox, QGraphicsScene
 from plyer import notification
 
 from UI.main_window import Ui_MainWindow as MainWindowUI
@@ -14,6 +14,9 @@ from threads import VideoThread, CamThread, ScreenShooter
 
 
 class MainController(QtWidgets.QMainWindow):
+    """
+    The controller of the Main Window and the interface between the front end and back end
+    """
 
     def __init__(self):
         super().__init__()
@@ -21,7 +24,7 @@ class MainController(QtWidgets.QMainWindow):
         self.ui.setupUi(self)  # Initialize  ui and QtWidgets
         self.animation1 = None
         self.animation2 = None
-        self.powerBtn_state = False
+        self.powerBtn_state = False  # for controlling the state of the
         self.profile_info_state = True
         self.function_mode_duration = 0
         # Initialize main_window
@@ -31,14 +34,12 @@ class MainController(QtWidgets.QMainWindow):
         # Initialize each provider and each thread
         self.arg_provider = ArgumentProvider()
         self.argument_provider_connect_init()
-
         self.key_binding_provider = KeyBindingProvider()
         self.key_binding_provider_connect_init()
 
         self.video_thread = VideoThread(self.arg_provider.settings)
         self.video_thread_connect_init()
-
-        self.screen_shooter = ScreenShooter()
+        self.screen_shooter = ScreenShooter()  # avoid the screenshot blocking the cam thread
         self.cam_thread = CamThread(self.key_binding_provider.settings, self.arg_provider.settings)
         self.cam_thread_connect_init()
         self.add_key_window = AddKeyWindow()
@@ -50,7 +51,6 @@ class MainController(QtWidgets.QMainWindow):
         self.profile_page_connect_init()
         self.key_binding_page_connect_init()
         self.argument_page_connect_init()
-
         # for moving the main window
         self.moveFlag = False
         self.movePosition = None
@@ -106,24 +106,32 @@ class MainController(QtWidgets.QMainWindow):
     def set_profile_list(self, file_name):
         """
         Add the filename in the profile list
-        :param file_name: str
+        :param file_name: the file name
         :return: None
         """
         self.ui.profile_list.addItem(file_name)
 
     def profile_info_state_unsaved(self):
+        """
+        Change the stylesheet of the info state
+        :return: None
+        """
         self.ui.profile_info_state.setText('尚未儲存')
         self.ui.profile_info_state_box.setStyleSheet('background-color:rgb(255, 85, 0)')
 
     def profile_info_state_saved(self):
+        """
+        Change the stylesheet of the info state
+        :return: None
+        """
         self.ui.profile_info_state.setText('已儲存')
         self.ui.profile_info_state_box.setStyleSheet('')
 
     def set_profile_list_selected_item(self, index, file_name):
         """
         Set up the selected filename in UI
-        :param index: int
-        :param file_name: str
+        :param index: the index of the file in the file list
+        :param file_name: the file name
         :return: None
         """
         self.ui.profile_list.setCurrentRow(index)
@@ -133,36 +141,37 @@ class MainController(QtWidgets.QMainWindow):
 
     def set_profile_list_set_description(self, profile_name, description):
         """
-        Set up the filename and it's description in UI
-        :param profile_name:
-        :param description:
+        Set up the file name, and it's description in UI
+        :param profile_name: the file name
+        :param description: the  of the file
         :return:
         """
         self.ui.profile_name.setPlainText(profile_name)
         self.ui.profile_description_context.setPlainText(description)
 
-    def set_key_binding_table_row(self, row, value):
+    def set_key_binding_table_row(self, row: int, key_binding_list: list):
         """
         Set up key binding in the table
         :param row: int
-        :param value: list
+        :param key_binding_list: list
         :return: None
         """
         if row == self.ui.key_binding_table.rowCount():
             self.ui.key_binding_table.setRowCount(self.ui.key_binding_table.rowCount() + 1)
         for i in range(3):
             if i == 0:
-                new_item = QTableWidgetItem(value[i])
+                new_item = QTableWidgetItem(key_binding_list[i])
                 new_item.setTextAlignment(4)
                 self.ui.key_binding_table.setItem(row, i, new_item)
             else:
-                new_item = GestureComboBox(value[i])
+                new_item = GestureComboBox(key_binding_list[i])
                 new_item.currentIndexChanged.connect(self.check_key_binding)
                 self.ui.key_binding_table.setCellWidget(row, i, new_item)
 
-    def del_key(self):
+    def del_item(self):
         """
-        Set the key as default in the selected item in the key binding table
+        Set the gesture as default or remove the custom hot key in the selected item in the key binding table according
+        to the current item
         :return: None
         """
         if self.ui.key_binding_table.currentColumn() == 1 or self.ui.key_binding_table.currentColumn() == 2:
@@ -173,17 +182,18 @@ class MainController(QtWidgets.QMainWindow):
 
     def save_key_binding_setting(self):
         """
-        Save the key binding
+        Save the key binding.According to the type of the function code,determine how to convert the values
         :return: None
         """
         new_settings = dict()
         new_settings['Description'] = self.key_binding_provider.settings['Description']
+        # Avoid the same gesture combine of the custom hot key when the two hands are set to 0
         function_code_list = set()
         for row in range(self.ui.key_binding_table.rowCount()):
             if self.ui.key_binding_table.item(row, 0).text().isdigit():
                 function_code_list.add(int(self.ui.key_binding_table.item(row, 0).text()))
         for row in range(self.ui.key_binding_table.rowCount()):
-            if self.ui.key_binding_table.item(row, 0).text().isdigit():
+            if self.ui.key_binding_table.item(row, 0).text().isdigit():  # normal function mode
                 function_code = int(self.ui.key_binding_table.item(row, 0).text())
                 if self.ui.key_binding_table.cellWidget(row, 1).currentText() == '未設置' \
                         and self.ui.key_binding_table.cellWidget(row, 2).currentText() == '未設置':
@@ -197,7 +207,7 @@ class MainController(QtWidgets.QMainWindow):
                     right_hand = int((lambda text: text if text != '未設置' else -1)
                                      (self.ui.key_binding_table.cellWidget(row, 2).currentText()))
                 new_settings[(left_hand, right_hand)] = function_code
-            else:
+            else:  # custom hot key
                 function_code = self.ui.key_binding_table.item(row, 0).text()
                 temp_function_code = row
                 while temp_function_code in function_code_list:
@@ -217,6 +227,10 @@ class MainController(QtWidgets.QMainWindow):
         self.key_binding_provider.update_settings(new_settings)
 
     def check_key_binding(self):
+        """
+        Check if the gesture combine of the current row is legal or not.If not, set the index of the gesture to 0
+        :return: None
+        """
         current_row = self.ui.key_binding_table.currentRow()
         current_col = self.ui.key_binding_table.currentColumn()
         left_hand = self.ui.key_binding_table.cellWidget(current_row, 1).currentIndex()
@@ -225,7 +239,8 @@ class MainController(QtWidgets.QMainWindow):
         if current_col != 0 and (left_hand != 0 or right_hand != 0):
             for i in range(self.ui.key_binding_table.rowCount()):
                 if self.ui.key_binding_table.cellWidget(i, 1).currentIndex() == left_hand \
-                        and self.ui.key_binding_table.cellWidget(i, 2).currentIndex() == right_hand and i!=current_row:
+                        and self.ui.key_binding_table.cellWidget(i,
+                                                                 2).currentIndex() == right_hand and i != current_row:
                     flag_same = True
                     break
             if flag_same:
@@ -233,6 +248,11 @@ class MainController(QtWidgets.QMainWindow):
                 self.ui.key_binding_table.cellWidget(current_row, 2).setCurrentIndex(0)
 
     def add_custom_key(self, key_list: list):
+        """
+        Add the new row for the custom hot key.Change it to a string and append a new row in the key binding table
+        :param key_list: the list of custom keys
+        :return: None
+        """
         if key_list:
             new_row = self.ui.key_binding_table.rowCount()
             self.ui.key_binding_table.setRowCount(self.ui.key_binding_table.rowCount() + 1)
@@ -241,7 +261,6 @@ class MainController(QtWidgets.QMainWindow):
                 key += key_list[i]
                 if i != len(key_list) - 1:
                     key += '/'
-            print(key)
             new_item = QTableWidgetItem(key)
             new_item.setTextAlignment(4)
             self.ui.key_binding_table.setItem(new_row, 0, new_item)
@@ -250,11 +269,11 @@ class MainController(QtWidgets.QMainWindow):
                 new_item.currentIndexChanged.connect(self.check_key_binding)
                 self.ui.key_binding_table.setCellWidget(new_row, i, new_item)
 
-    def save_arg(self, new_file_name, new_arg_settings):
+    def save_arg(self, new_file_name: str, new_arg_settings: dict):
         """
         Update the argument's setting in file and cam_thread
-        :param new_file_name: str
-        :param new_arg_settings: dict
+        :param new_file_name: the  new file name
+        :param new_arg_settings: the new argument settings
         :return: None
         """
         self.arg_provider.update_arg_file(new_file_name, new_arg_settings)
@@ -262,7 +281,7 @@ class MainController(QtWidgets.QMainWindow):
 
     def get_arg(self):
         """
-        Get the value from the UI
+        Get the values of the arguments from the UI
         :return: dict
         """
         return {
@@ -273,10 +292,10 @@ class MainController(QtWidgets.QMainWindow):
             'rate': self.ui.rate_spinBox.value()
         }
 
-    def set_arg(self, settings):
+    def set_arg(self, settings: dict):
         """
         Set up the UI with the settings
-        :param settings: dict
+        :param settings: the argument settings
         :return: None
         """
         self.ui.min_cutoff_SpinBox.setValue(settings['min_cutoff'])
@@ -286,19 +305,19 @@ class MainController(QtWidgets.QMainWindow):
         self.ui.detection_spinBox.setValue(settings['min_detection_confidence'])
         self.ui.tracking_spinBox.setValue(settings['min_tracking_confidence'])
 
-    def set_arg_list(self, index, file_name):
+    def set_arg_list(self, index: int, file_name: str):
         """
-        Add the filename in the index of the argument comboBox
-        :param index:int
-        :param file_name:str
+        Insert the filename in the index of the argument comboBox
+        :param index: the index of the file
+        :param file_name: the file name
         :return:
         """
         self.ui.arg_comboBox.insertItem(index, file_name)
 
-    def set_selected_arg(self, index):
+    def set_selected_arg(self, index: int):
         """
         Set the selected file in comboBox
-        :param index:int - the order of the file list
+        :param index: the order of the file in the file list
         :return: None
         """
         self.ui.arg_comboBox.setCurrentIndex(index)
@@ -331,6 +350,10 @@ class MainController(QtWidgets.QMainWindow):
         time.sleep(0.2)
 
     def powerBtn_state_changed(self):
+        """
+        When the powerBtn is pressed,change its styleSheet and icon
+        :return: None
+        """
         if not self.powerBtn_state:
             self.ui.power_btn.setStyleSheet('background-color: rgb(250, 185, 65);'
                                             'border-radius:25px')
@@ -344,7 +367,15 @@ class MainController(QtWidgets.QMainWindow):
         self.ui.power_btn.setIcon(icon)
         self.powerBtn_state = not self.powerBtn_state
 
-    def show_function_mode(self, result, duration):
+    def show_function_mode(self, result: str, duration: int = 1):
+        """
+        Show the function with duration
+        :param result: the label of the function mode
+        :param duration: the lasting based on fps
+        :return: None
+        """
+        print(result, duration, sep=':')
+        print(self.function_mode_duration)
         if self.function_mode_duration <= 0:
             self.ui.func_result_label.setText(result)
             self.function_mode_duration = duration
@@ -358,6 +389,7 @@ class MainController(QtWidgets.QMainWindow):
         """
         ui = CaptionWindowUI()
         ui.setupUi(self.caption_window)
+        self.caption_window.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.caption_window.show()
 
     def video_start(self):
@@ -369,23 +401,27 @@ class MainController(QtWidgets.QMainWindow):
         self.video_thread.update_arg_settings(args)
         self.video_thread.start()
 
-    def video_display(self, scene):
+    def video_display(self, scene: QGraphicsScene):
         """
-        Update the frame in the graphicsView
-        :param scene: QGraphicsScene
+        Update the frame from the video thread in the graphicsView of video
+        :param scene: the result frame
         :return: None
         """
         self.ui.video_graphicsView.setScene(scene)
 
-    def cam_display(self, scene):
+    def cam_display(self, scene: QGraphicsScene):
         """
-        Update the frame in the graphicsView
-        :param scene: QGraphicsScene
+        Update the frame from the cam thread in the graphicsView of cam
+        :param scene: the result frame
         :return: None
         """
         self.ui.cam_graphicsView.setScene(scene)
 
     def cam_not_working(self):
+        """
+        When the cam is not detected, change the stylesheet of the powerBtn
+        :return: None
+        """
         self.ui.power_btn.setStyleSheet('background-color: rgb(230, 0, 0);'
                                         'border-radius:25px')
         icon = QtGui.QIcon()
@@ -394,17 +430,14 @@ class MainController(QtWidgets.QMainWindow):
         self.ui.power_btn.setEnabled(False)
 
     @staticmethod
-    def show_notification(title, content):
-        notification.notify(
-            # title of the notification,
-            title=title,
-            # the body of the notification
-            message=content,
-            # creating icon for the notification
-            # we need to download a icon of ico file format
-            # the notification stays for 50sec
-            timeout=2
-        )
+    def show_notification(title: str, content: str):
+        """
+        Show the system notification
+        :param title: the title of the notification
+        :param content: the content of the notification
+        :return: None
+        """
+        notification.notify(title=title, message=content, timeout=2)
 
     def argument_provider_connect_init(self):
         self.arg_provider.trigger_load_arg_list.connect(self.set_arg_list)
@@ -461,7 +494,7 @@ class MainController(QtWidgets.QMainWindow):
 
     def key_binding_page_connect_init(self):
         self.ui.key_save_btn.clicked.connect(self.save_key_binding_setting)
-        self.ui.del_key_btn.clicked.connect(self.del_key)
+        self.ui.del_key_btn.clicked.connect(self.del_item)
         self.ui.set_default_btn.clicked.connect(self.key_binding_provider.set_setting_default)
         self.ui.caption_btn.clicked.connect(self.open_caption_window)
         self.ui.add_key_btn.clicked.connect(self.add_key_window.show)
@@ -480,7 +513,11 @@ class MainController(QtWidgets.QMainWindow):
 
 
 class GestureComboBox(QComboBox):
-    def __init__(self, current):
+    """
+    A comboBox class for gesture
+    """
+
+    def __init__(self, current: str):
         super(GestureComboBox, self).__init__()
         self.addItem('未設置')
         for i in range(9):

@@ -90,15 +90,18 @@ class Ui_MainWindow(object):
 "14:螢幕截圖\n"
 "15:滑鼠左鍵單點\n"
 "16:滑鼠右鍵單點\n"
-"17:進入雙手動態模式"))
+"17:左鍵雙擊\n"
+"18:進入動態模式\n"
+"19:進入動態模式"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.function_code_tab), _translate("MainWindow", "功能編碼"))
         self.groupBox_2.setTitle(_translate("MainWindow", "手勢編碼說明:"))
-        self.label_2.setText(_translate("MainWindow", "0:比五 \n"
-"1:握拳\n"
-"2:握拳後伸出食指\n"
-"3:握拳後食指和拇指尖端連起來 \n"
-"4:握拳後中指和拇指尖端連起來\n"
-"5:比二\n"
+        self.label_2.setText(_translate("MainWindow", "0:比零 \n"
+"1:比一\n"
+"2:比二\n"
+"3:比三 \n"
+"4:比四\n"
+"5:比五\n"
 "6:比六\n"
-"7:比八 "))
+"7:比七\n"
+"8:比八 "))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.gesture_code_tab), _translate("MainWindow", "手勢編碼"))

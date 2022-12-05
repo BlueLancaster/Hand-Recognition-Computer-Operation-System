@@ -77,7 +77,9 @@
 14:螢幕截圖
 15:滑鼠左鍵單點
 16:滑鼠右鍵單點
-17:進入雙手動態模式</string>
+17:左鍵雙擊
+18:進入動態模式
+19:進入動態模式</string>
              </property>
              <property name="textFormat">
               <enum>Qt::AutoText</enum>
@@ -112,14 +114,15 @@
            <item>
             <widget class="QLabel" name="label_2">
              <property name="text">
-              <string>0:比五 
-1:握拳
-2:握拳後伸出食指
-3:握拳後食指和拇指尖端連起來 
-4:握拳後中指和拇指尖端連起來
-5:比二
+              <string>0:比零 
+1:比一
+2:比二
+3:比三 
+4:比四
+5:比五
 6:比六
-7:比八 </string>
+7:比七
+8:比八 </string>
              </property>
             </widget>
            </item>
